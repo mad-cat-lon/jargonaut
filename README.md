@@ -1,4 +1,4 @@
-# unicloak 
+# unicloak ![pep-8](https://github.com/xor-eax-eax-ret/unicloak/actions/workflows/pep8.yml/badge.svg)
 Unicode support can make things weird sometimes, especially when code is involved. `unicloak` abuses identifier normalization in Python, making code still somewhat readable but possibly bypassing human inspection or string-based matching defenses by replacing everything with an equivalent identifier variant. I wrote this after seeing a [writeup](https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection) on a malicious Python package that uses this same method to evade AV detection.
 NOTE: I plan on turning this into a fully-featured Python obfuscator like [pyminifier](https://github.com/liftoff/pyminifier) soon. 
 
