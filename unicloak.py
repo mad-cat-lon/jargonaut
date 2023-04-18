@@ -4,7 +4,7 @@ from typing import Any
 import unicodedata
 from functools import lru_cache
 import sys
-
+import mba 
 
 class Unicloak(ast.NodeTransformer):
     """
@@ -46,15 +46,6 @@ class Unicloak(ast.NodeTransformer):
             node.name = self.cloak_id(node.name)
         return self.generic_visit(node)
 
-    def visit_Call(self, node: ast.Call) -> Any:
-        # TODO: improve later
-        if isinstance(node.func, ast.Name):
-            if node.func.id not in self.builtins:
-                node.func.id = self.cloak_id(node.func.id)
-            return self.generic_visit(node)
-        else:
-            return self.generic_visit(node)
-
     def visit_Name(self, node: ast.Name) -> Any:
         if node.id not in self.builtins:
             node.id = self.cloak_id(node.id)
@@ -64,7 +55,16 @@ class Unicloak(ast.NodeTransformer):
         for alias in node.names:
             alias.asname = self.cloak_id(alias.name)
         return self.generic_visit(node)
-
+    
+    def visit_Expr(self, node: ast.Expr) -> Any:
+        if isinstance(node.value, ast.BinOp):
+            terms = mba.generate_terms(5)
+            print(f"Coefficients: {terms}")
+            terms[2] += 1
+            terms[4] += 1
+            print(f"Updated coefficients: {terms}")
+            mba.generate_linear_mba(terms, node.value)
+        return self.generic_visit(node)
 
 def main():
     if len(sys.argv) != 3:
