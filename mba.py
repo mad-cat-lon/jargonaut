@@ -6,50 +6,51 @@ import random
 
 def x_and_y(x, y):
     return ast.Expr(
-        value=ast.BoolOp(
-            op=ast.And(),
-            values=[
-                ast.Name(id=x, ctx=ast.Load()),
-                ast.Name(id=y, ctx=ast.Load())
-            ]
+        value=ast.BinOp(
+            left=ast.Name(id=x, ctx=ast.Load()),
+            op=ast.BitAnd(),
+            right=ast.Name(id=y, ctx=ast.Load())
         )
     )
 
+
 def x_and_not_y(x, y):
     return ast.Expr(
-        value=ast.BoolOp(
-            op=ast.And(),
-            values=[
-                ast.Name(id=x, ctx=ast.Load()),
-                ast.UnaryOp(
-                    op=ast.Not(),
-                    operand=ast.Name(id=y, ctx=ast.Load()))
-            ]
+        value=ast.BinOp(
+            left=ast.Name(id=x, ctx=ast.Load()),
+            op=ast.BitAnd(),
+            right=ast.UnaryOp(
+                op=ast.Invert(),
+                operand=ast.Name(id=y, ctx=ast.Load())
+            )
         )
     )
+
 
 def x(x, y=None):
     return ast.Expr(
         value=ast.Name(id=x, ctx=ast.Load())
     )
 
+
 def not_x_and_y(x, y):
     return ast.Expr(
-    value=ast.BoolOp(
-        op=ast.And(),
-        values=[
-            ast.UnaryOp(
-                op=ast.Not(),
-                operand=ast.Name(id=x, ctx=ast.Load())),
-            ast.Name(id=y, ctx=ast.Load())
-        ]
+        value=ast.BinOp(
+            left=ast.UnaryOp(
+                op=ast.Invert(),
+                operand=ast.Name(id=x, ctx=ast.Load())
+            ),
+            op=ast.BitAnd(),
+            right=ast.Name(id=y, ctx=ast.Load())
+        )
     )
-)
+
 
 def y(y, x=None):
     return ast.Expr(
         value=ast.Name(id=y, ctx=ast.Load())
     )
+
 
 def x_xor_y(x, y):
     return ast.Expr(
@@ -60,35 +61,34 @@ def x_xor_y(x, y):
         )
     )
 
+
 def x_or_y(x, y):
     return ast.Expr(
-        value=ast.BoolOp(
-            op=ast.Or(),
-            values=[
-                ast.Name(id=x, ctx=ast.Load()),
-                ast.Name(id=y, ctx=ast.Load())
-            ]
+        value=ast.BinOp(
+            left=ast.Name(id=x, ctx=ast.Load()),
+            op=ast.BitOr(),
+            right=ast.Name(id=y, ctx=ast.Load())
         )
     )
+
 
 def not_inc_x_or_y(x, y):
     return ast.Expr(
         value=ast.UnaryOp(
-            op=ast.Not(),
-            operand=ast.BoolOp(
-                op=ast.Or(),
-                values=[
-                    ast.Name(id=x, ctx=ast.Load()),
-                    ast.Name(id=y, ctx=ast.Load())
-                ]
+            op=ast.Invert(),
+            operand=ast.BinOp(
+                left=ast.Name(id=x, ctx=ast.Load()),
+                op=ast.BitOr(),
+                right=ast.Name(id=y, ctx=ast.Load())
             )
         )
     )
 
+
 def not_inc_x_xor_y(x, y):
     return ast.Expr(
         value=ast.UnaryOp(
-            op=ast.Not(),
+            op=ast.Invert(),
             operand=ast.BinOp(
                 left=ast.Name(id=x, ctx=ast.Load()),
                 op=ast.BitXor(),
@@ -97,60 +97,60 @@ def not_inc_x_xor_y(x, y):
         )
     )
 
+
 def not_y(y, x=None):
     return ast.Expr(
         value=ast.UnaryOp(
-            op=ast.Not(),
+            op=ast.Invert(),
             operand=ast.Name(id=y, ctx=ast.Load())
         )
     )
 
+
 def x_or_not_y(x, y):
     return ast.Expr(
-        value=ast.BoolOp(
-            op=ast.Or(),
-            values=[
-                ast.Name(id=x, ctx=ast.Load()),
-                ast.UnaryOp(
-                    op=ast.Not(),
-                    operand=ast.Name(id=y, ctx=ast.Load())
-                )
-            ]
+        value=ast.BinOp(
+            left=ast.Name(id=x, ctx=ast.Load()),
+            op=ast.BitOr(),
+            right=ast.UnaryOp(
+                op=ast.Invert(),
+                operand=ast.Name(id=y, ctx=ast.Load())
+            )
+
         )
     )
+
 
 def not_x(x, y=None):
     return ast.Expr(
         value=ast.UnaryOp(
-            op=ast.Not(),
+            op=ast.Invert(),
             operand=ast.Name(id=x, ctx=ast.Load())
         )
     )
 
+
 def not_x_or_y(x, y):
     return ast.Expr(
-        value=ast.BoolOp(
-            op=ast.Or(),
-            values=[
-                ast.UnaryOp(
-                    op=ast.Not(),
-                    operand=ast.Name(id=x, ctx=ast.Load())
-                ),
-                ast.Name(id=y, ctx=ast.Load())
-            ]
+        value=ast.BinOp(
+            left=ast.UnaryOp(
+                op=ast.Invert(),
+                operand=ast.Name(id=x, ctx=ast.Load())
+            ),
+            op=ast.BitOr(),
+            right=ast.Name(id=x, ctx=ast.Load())
         )
     )
+
 
 def not_inc_x_and_y(x, y):
     return ast.Expr(
         value=ast.UnaryOp(
-            op=ast.Not(),
-            operand=ast.BoolOp(
-                op=ast.And(),
-                values=[
-                    ast.Name(id=x, ctx=ast.Load()),
-                    ast.Name(id=y, ctx=ast.Load())
-                ]
+            op=ast.Invert(),
+            operand=ast.BinOp(
+                left=ast.Name(id=x, ctx=ast.Load()),
+                op=ast.BitAnd(),
+                right=ast.Name(id=y, ctx=ast.Load())
             )
         )
     )
@@ -160,6 +160,7 @@ def min_one(x=None, y=None):
     return ast.Expr(
         value=ast.Constant(-1)
     )
+
 
 truth_table = np.array([
     [0, 0, 0, 1],  # x & y
@@ -198,6 +199,7 @@ func_list = [
     min_one
 ]
 
+
 def generate_terms(expr_number):
     while True:
         coeffs = np.zeros(15, dtype=np.int64)
@@ -212,7 +214,8 @@ def generate_terms(expr_number):
 
         s = Solver()
         s.add(And([X[i] != 0 for i in range(n)]))
-
+        for i in range(n):
+            s.add(X[i] != 0)
 
         for i in range(m):
             s.add(Sum([A[i][j]*X[j] for j in range(n)]) == b[i])
@@ -221,25 +224,30 @@ def generate_terms(expr_number):
             print(f"expr_selector: {expr_selector}")
             # We found a solution! 
             m = s.model()
+            print(m)
             sol = [m[i] for i in sorted(m, key=lambda x: x.name())]
             print(f"SAT solver found a solution: {sol}")
             for i in range(expr_number):
-                print(f"i: {i} expr_selector[i]: {expr_selector[i]} sol[i]: {sol[i].as_string()}")
+                # print(f"i: {i} expr_selector[i]: {expr_selector[i]} sol[i]: {sol[i].as_string()}")
                 coeffs[expr_selector[i]] += int(sol[i].as_string())
             return coeffs
+
 
 def generate_linear_mba(terms: list, expr: ast.BinOp):
     final_expr = []
     primitive_expr = None
     # Just doing add for now 
-    x = expr.left.id
-    y = expr.right.id
-    for i in range(15):
-        primitive_expr = func_list[i](x=x, y=y)
-        print(f"{ast.dump(primitive_expr)} >> {ast.unparse(primitive_expr)}")
-        final_expr.append(f"({terms[i]})*({ast.unparse(primitive_expr)})")
-    final_expr = '+'.join(final_expr)
-    print(final_expr)
+    if (isinstance(expr.left, ast.Name)) and (isinstance(expr.right, ast.Name)):
+        x = expr.left.id
+        y = expr.right.id
+        for i in range(15):
+            primitive_expr = func_list[i](x=x, y=y)
+            if terms[i] != 0:
+                print(f"{ast.dump(primitive_expr)} >> {ast.unparse(primitive_expr)}")
+                final_expr.append(f"({terms[i]})*({ast.unparse(primitive_expr)})")
+        final_expr = '+'.join(final_expr)
+        return ast.parse(final_expr)
+    else:
+        return expr
 
-if __name__ == "__main__":
-    coeffs = generate_terms(6)
+# https://bbs.kanxue.com/thread-271574.htm
