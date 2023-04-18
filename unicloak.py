@@ -9,10 +9,7 @@ from utils.unicode import unicode
 
 class Unicloak(ast.NodeTransformer):
     """
-    Uses PEP-672 "Normalizing identifiers" to convert
-    all identifiers into randomly generated Unicode equivalents
-    https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection
-    https://peps.python.org/pep-0672/#normalizing-identifiers
+    Unicloak base class that transforms nodes
     """
     def __init__(self):
         self.builtins = [
