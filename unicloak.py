@@ -1,11 +1,9 @@
-import random
 import ast
 from typing import Any
-import unicodedata
-from functools import lru_cache
 import sys
 from utils.mba import mba
 from utils.unicode import unicode
+
 
 class Unicloak(ast.NodeTransformer):
     """
@@ -15,25 +13,31 @@ class Unicloak(ast.NodeTransformer):
         self.builtins = [
             name for name, func in sorted(vars(__builtins__).items())
         ] + ["__builtins__"]
-    
+
     def visit_ClassDef(self, node: ast.ClassDef) -> Any:
-        node.name = self.cloak_id(node.name)
+        node.name = unicode.convert_unicode(node.name)
         return self.generic_visit(node)
     
     def visit_FunctionDef(self, node: ast.FunctionDef) -> Any:
         if node.name[0] != "_":
-            node.name = self.cloak_id(node.name)
+            node.name = unicode.convert_unicode(node.name)
         return self.generic_visit(node)
 
     def visit_Name(self, node: ast.Name) -> Any:
         if node.id not in self.builtins:
-            node.id = self.cloak_id(node.id)
+            node.id = unicode.convert_unicode(node.id)
         return self.generic_visit(node)
 
     def visit_Import(self, node: ast.Import) -> Any:
         for alias in node.names:
             alias.name = unicode.convert_unicode(alias.name)
         return self.generic_visit(node)
+    
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> Any:
+        node.module = unicode.convert_unicode(node.module)
+        for alias in node.names:
+            alias.name = unicode.convert_unicode(alias.name)
+        return node
 
     def visit_Expr(self, node: ast.Expr) -> Any:
         # Obfuscate expressions with BinOps using MBA
