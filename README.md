@@ -19,7 +19,7 @@
 - Better performance (maybe don't use z3 for MBA)
 
 ## Usage
-```unicloak.py source.py obfuscated.py```
+```main.py source.py obfuscated.py```
 
 ## Examples
 ### Unicode identifier variants

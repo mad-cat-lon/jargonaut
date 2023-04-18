@@ -1,19 +1,20 @@
 import ast
 from typing import Any
-import sys
-from utils.mba import mba
-from utils.unicode import unicode
+from unicloak.utils.mba import mba
+from unicloak.utils.unicode import unicode
+import json 
 
 
 class Unicloak(ast.NodeTransformer):
     """
     Unicloak base class that transforms nodes
     """
-    def __init__(self):
-        self.builtins = [
-            name for name, func in sorted(vars(__builtins__).items())
-        ] + ["__builtins__"]
-
+    def __init__(self, config_path=None):
+        self.builtins = []
+        if config_path is None:
+            f = open("default.json")
+            self.config = json.load(f)
+            
     def visit_ClassDef(self, node: ast.ClassDef) -> Any:
         node.name = unicode.convert_unicode(node.name)
         return self.generic_visit(node)
@@ -65,19 +66,4 @@ class Unicloak(ast.NodeTransformer):
         return self.generic_visit(node)
 
 
-def main():
-    if len(sys.argv) != 3:
-        print("[!] unicloak.py input_file.py output_file.py")
-        exit()
-    else:
-        with open(sys.argv[1], "r", encoding="utf-8") as in_file:
-            uc = Unicloak()
-            tree = ast.parse(in_file.read())
-            uc.visit(tree)
-            obfus = ast.unparse(tree)
-            with open(sys.argv[2], "w", encoding="utf-8") as out_file:
-                out_file.write(obfus)
 
-
-if __name__ == "__main__":
-    main()
