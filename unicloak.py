@@ -4,7 +4,8 @@ from typing import Any
 import unicodedata
 from functools import lru_cache
 import sys
-import mba 
+from utils.mba import mba
+from utils.unicode import unicode
 
 class Unicloak(ast.NodeTransformer):
     """
@@ -17,25 +18,6 @@ class Unicloak(ast.NodeTransformer):
         self.builtins = [
             name for name, func in sorted(vars(__builtins__).items())
         ] + ["__builtins__"]
-    
-    @lru_cache
-    def get_codepoints(self, c):
-        """Gets all valid unicode codepoints given a char c"""
-        # Don't include anything in Enclosed Alphanumeric Supplement 
-        codepoints = [
-            chr(i) for i in range(0x10FFFF)
-            if unicodedata.normalize("NFKC", chr(i)) == c
-            and not (0x2460 <= i <= 0x24FF)
-            and not (0x1F130 <= i <= 0x1F149)
-        ]
-        if len(codepoints) == 0:
-            return c
-        else:
-            return codepoints
-
-    def cloak_id(self, identifier):
-        all_codepoints = [self.get_codepoints(j) for j in identifier]
-        return "".join([random.choice(i) for i in all_codepoints])
     
     def visit_ClassDef(self, node: ast.ClassDef) -> Any:
         node.name = self.cloak_id(node.name)
@@ -53,18 +35,34 @@ class Unicloak(ast.NodeTransformer):
 
     def visit_Import(self, node: ast.Import) -> Any:
         for alias in node.names:
-            alias.asname = self.cloak_id(alias.name)
+            alias.name = unicode.convert_unicode(alias.name)
         return self.generic_visit(node)
-    
+
     def visit_Expr(self, node: ast.Expr) -> Any:
+        # Obfuscate expressions with BinOps using MBA
         if isinstance(node.value, ast.BinOp):
-            terms = mba.generate_terms(5)
-            print(f"Coefficients: {terms}")
-            terms[2] += 1
-            terms[4] += 1
-            print(f"Updated coefficients: {terms}")
-            mba.generate_linear_mba(terms, node.value)
+            obfus = mba.generate_linear_mba(node.value)
+            node.value = obfus
+            return node
         return self.generic_visit(node)
+        
+    def visit_Assign(self, node: ast.Assign) -> Any:
+        # Obfuscate assignments with BinOps using MBA
+        if isinstance(node.value, ast.BinOp):
+            obfus = mba.generate_linear_mba(node.value)
+            node.value = obfus
+            return self.generic_visit(node)
+        return self.generic_visit(node)
+
+    def visit_Constant(self, node: ast.Constant) -> Any:
+        if isinstance(node.value, int):
+            obfus = mba.generate_linear_mba(node)
+            node.value = obfus.value
+            return obfus.value
+        elif isinstance(node.value, str):
+            pass
+        return self.generic_visit(node)
+
 
 def main():
     if len(sys.argv) != 3:
