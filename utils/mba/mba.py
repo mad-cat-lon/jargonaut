@@ -55,7 +55,7 @@ def generate_terms(expr_number):
     while True:
         coeffs = np.zeros(15, dtype=np.int64)
         expr_selector = np.array(
-            [random.randint(0, expr_number-1) for _ in range(expr_number)]
+            [random.randint(0, expr_number - 1) for _ in range(expr_number)]
         )
 
         # Ax = 0
@@ -74,7 +74,7 @@ def generate_terms(expr_number):
             s.add(X[i] != 0)
         # Constraints for matrix mult
         for i in range(m):
-            s.add(Sum([A[i][j]*X[j] for j in range(n)]) == b[i])
+            s.add(Sum([A[i][j] * X[j] for j in range(n)]) == b[i])
 
         if s.check() == sat:
             # We found a solution! 
