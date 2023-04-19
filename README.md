@@ -70,6 +70,10 @@ if __name__ == '__main__':
     a = op(1 * (1337 & 1984) + 1 * (1337 ^ 1984) + -1 * (1337 | 1984) + -10 * -1)
     print(a)
 ```
+## Requirements 
+z3-solver
+numpy
+
 ## References
 - https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection
 - https://peps.python.org/pep-0672/#normalizing-identifiers
