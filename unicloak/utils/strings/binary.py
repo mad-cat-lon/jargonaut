@@ -10,7 +10,14 @@ def _text_to_bits(text, encoding='utf-8', errors='surrogatepass'):
 def binary(keys, string):
     """
     Obfuscates string literals by encoding them as binary and then
-    using similar-looking Unicode characters to represent the 1s and 0s
+    using similar-looking Unicode characters to represent the 1s and 0s.
+
+    Args:
+        keys: list (probably should be tuple) of replacement chars
+        string: string to obfuscate
+    
+    Returns:
+        ast.Expr() object
     """
     if len(keys) != 2:
         raise Exception(
@@ -24,6 +31,9 @@ def binary(keys, string):
         for j in range(5)
     ]
     obfus = ''.join([keys[0] if i == "0" else keys[1] for i in string_as_bin])
+    # Thanks to https://stackoverflow.com/a/7397689
+    # Might need to stop using := here, as this breaks when code is ran 
+    # through unicloak twice 
     decode_func = "(lambda b, e='utf-8', err='surrogatepass': ((n := int(b, 2))).to_bytes((\
             n.bit_length() + 7) // 8, 'big').decode(e, err) or '')"
     decode_func = f"(lambda {vars[0]}, {vars[1]}='utf-8', {vars[2]}='surrogatepass':\
