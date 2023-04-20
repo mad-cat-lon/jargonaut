@@ -66,7 +66,7 @@ class Unicloak(ast.NodeTransformer):
     def visit_Constant(self, node: ast.Constant) -> Any:
         if isinstance(node.value, int):
             obfus = mba.generate_linear_mba(node)
-            node.value = obfus.value
+            node.value = obfus
             return obfus.value
         if isinstance(node.value, str):
             # Placeholders for now

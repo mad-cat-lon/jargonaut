@@ -94,20 +94,7 @@ def generate_linear_mba(expr):
 @generate_linear_mba.register
 def _(expr: ast.BinOp):
     """
-    Generates linear MBA for BinOp nodes:
-        class ast.Add
-        class ast.Sub
-        class ast.Mult
-        class ast.Div
-        class ast.FloorDiv
-        class ast.Mod
-        class ast.Pow
-        class ast.LShift
-        class ast.RShift
-        class ast.BitOr
-        class ast.BitXor
-        class ast.BitAnd
-        class ast.MatMult
+    Generates linear MBA for BinOp nodes.
     """
     final_expr = []
     primitive_expr = None
@@ -168,4 +155,4 @@ def _(const: ast.Constant):
                 f"({terms[i]})*({ast.unparse(primitive_expr)})"
             )
     final_expr = '+'.join(final_expr)
-    return ast.parse(final_expr).body[0]
+    return ast.parse(final_expr).body[0].value
