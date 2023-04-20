@@ -67,7 +67,7 @@ class Unicloak(ast.NodeTransformer):
         if isinstance(node.value, int):
             obfus = mba.generate_linear_mba(node)
             node.value = obfus
-            return obfus.value
+            return obfus
         if isinstance(node.value, str):
             # Placeholders for now
             keys = ["Ꭓ", "𝑿", "𝙓", "𝚇"]
