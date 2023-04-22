@@ -16,7 +16,7 @@ NUM_TERMS = 10
 truth_table = np.array([
     [0, 0, 0, 1],  # x & y
     [0, 0, 1, 0],  # x & ~y
-    [0, 0, 1, 1],  # x 
+    [0, 0, 1, 1],  # x
     [0, 1, 0, 0],  # ~x & y
     [0, 1, 0, 1],  # y
     [0, 1, 1, 0],  # x ^ y
@@ -57,7 +57,6 @@ def generate_terms(expr_number):
         expr_selector = np.array(
             [random.randint(0, expr_number - 1) for _ in range(expr_number)]
         )
-
         # Ax = 0
         A = truth_table[expr_selector, :].T
         b = np.zeros(4)
@@ -84,7 +83,7 @@ def generate_terms(expr_number):
             for i in range(expr_number):
                 coeffs[expr_selector[i]] += int(sol[i].as_string())
             return coeffs
-        
+      
 
 @singledispatch
 def generate_linear_mba(expr):
@@ -146,8 +145,7 @@ def _(const: ast.Constant):
     terms = generate_terms(NUM_TERMS)
     terms[14] -= int(const.value)
     # Placeholder terms for now 
-    x = "1337"
-    y = "1984"
+    x, y = random.sample(["1337", "1984", "999", "747", "31415", "420"], 2)
     for i in range(15):
         primitive_expr = func_list[i](x=x, y=y)
         if terms[i] != 0:
