@@ -37,7 +37,7 @@ class Unicloak(ast.NodeTransformer):
         else:
             if self.names[node.name] is None:
                 self.names[node.name] = obfus_name()
-            #print(f"Renaming {node.name} to {self.names[node.name]}")
+            # print(f"Renaming {node.name} to {self.names[node.name]}")
             node.name = self.names[node.name]
             for arg in node.args.args:
                 if self.names[arg.arg] is None:
@@ -55,15 +55,15 @@ class Unicloak(ast.NodeTransformer):
     
     def visit_Name(self, node: ast.Name) -> Any:
         if node.id in self.builtins:
-            #print(f"Name({node.id}) in builtins. Generating Unicode variant")
+            # print(f"Name({node.id}) in builtins. Generating Unicode variant")
             node.id = unicode.convert_unicode(node.id)
         elif self.imports[node.id] is not None:
-            #print(f"Name({node.id}) in imports. Name({node.id}) -> Name({self.imports[node.id]})")
+            # print(f"Name({node.id}) in imports. Name({node.id}) -> Name({self.imports[node.id]})")
             node.id = self.imports[node.id]
         else:
             if self.names[node.id] is None:
                 self.names[node.id] = obfus_name()
-            #print(f"Name({node.id})->Name({self.names[node.id]})")
+            # print(f"Name({node.id})->Name({self.names[node.id]})")
             node.id = self.names[node.id]
         return self.generic_visit(node)
 
