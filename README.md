@@ -2,13 +2,15 @@
 `unicloak` is an obfuscator for hiding and protecting Python code with a few novel features. Note that this is a work in progress! 
 
 ## Features
-- Evade string matching with [Unicode identifier variants](https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection). 
+- Basic variable, function and parameter renaming (more coming soon)
+- Very basic string obfuscation 
+- String matching evasion with [Unicode identifier variants](https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection)
 - [Linear mixed boolean arithmetic expressions](https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5)
 
 ## Upcoming features 
 - Logging / debugging 
 - Obfuscate based on user-defined rules 
-- String obfuscation methods 
+- Better string obfuscation methods
 - Dead code insertion
 - Variable obfuscation methods (e.g `useful_var_name` -> `1l1l1l1lll`)
 - Comment removal 
