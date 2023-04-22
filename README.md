@@ -12,7 +12,6 @@
 - Obfuscate based on user-defined rules 
 - Better string obfuscation methods
 - Dead code insertion
-- Variable obfuscation methods (e.g `useful_var_name` -> `1l1l1l1lll`)
 - Comment removal 
 - Dead parameter insertion
 - Type hint removal 
