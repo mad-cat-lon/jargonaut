@@ -17,7 +17,6 @@ class BinaryString(ast.NodeTransformer):
 
     def visit_Constant(self, node: ast.Constant):
         if isinstance(node.value, str):
-            print(node.value)
             string_as_bin = self._text_to_bits(node.value)
             alphabet = "abcdefghijklmnopqrstuvwxyz"
             vars = [
@@ -25,9 +24,9 @@ class BinaryString(ast.NodeTransformer):
                 for j in range(5)
             ]
             obfus = ''.join(self.keys[0] if i == "0" else self.keys[1] for i in string_as_bin)
-            decode_func = f"(lambda {vars[0]}, {vars[1]}='utf-8', {vars[2]}='surrogatepass':\
-                (({vars[3]} := int({vars[0]}, 2))).to_bytes(({vars[3]}.bit_length() + 7) // 8, 'big')\
-                .decode({vars[1]}, {vars[2]}) or '')"
+            decode_func = f"(lambda {vars[0]}, {vars[1]}='utf-8', {vars[2]}='surrogatepass': \
+                (({vars[3]} := int({vars[0]}, 2))).to_bytes(({vars[3]}.bit_length() + 7)\
+                // 8, 'big').decode({vars[1]}, {vars[2]}) or '')"
             to_bin_func = f"(''.join(['0' if {vars[4]} == '{self.keys[0]}' else '1'\
                 for {vars[4]} in '{obfus}']))"
             final_expr = decode_func + to_bin_func

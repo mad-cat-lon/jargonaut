@@ -1,5 +1,5 @@
 import sys
-from unicloak import unicloak
+from unicloak.transformations import data, layout, control
 import ast 
 
 
@@ -9,9 +9,19 @@ def main():
         exit()
     else:
         with open(sys.argv[1], "r", encoding="utf-8") as in_file:
-            uc = unicloak.Unicloak(__builtins__)
+            
             tree = ast.parse(in_file.read())
-            tree = ast.fix_missing_locations(uc.visit(tree))
+            avoid = [
+                name for name, func in sorted(vars(__builtins__).items())
+            ] 
+            transformations = [
+                data.LinearMBA(),
+                data.BinaryString(),
+                layout.ConvertUnicode(),
+                layout.RandomizeNames(avoid=avoid)
+            ]
+            for t in transformations:
+                tree = t.visit(tree)
             obfus = ast.unparse(tree)
             with open(sys.argv[2], "w", encoding="utf-8") as out_file:
                 # Most specify coding in output file due to binary string obfuscation
