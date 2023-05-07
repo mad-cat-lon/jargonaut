@@ -1,5 +1,5 @@
 # unicloak ![pep-8](https://github.com/xor-eax-eax-ret/unicloak/actions/workflows/pep8.yml/badge.svg)
-`unicloak` is an obfuscator for hiding and protecting Python code with a few novel features. Note that this is a work in progress! 
+`unicloak` is an obfuscator for protecting Python code with a few novel features. Note that this is a work in progress! 
 
 ## Features
 - Basic variable, function and parameter renaming (more coming soon)
