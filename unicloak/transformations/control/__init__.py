@@ -1,2 +1,0 @@
-from unicloak.transformations.control.patch_return import PatchReturn
-from unicloak.transformations.control.merge_functions import MergeFunctions
