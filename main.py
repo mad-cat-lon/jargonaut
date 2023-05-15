@@ -1,5 +1,5 @@
 import sys
-from jargonaut.transformations import data, layout, control
+from jargonaut.transformations import data, layout
 import libcst as cst
 
 
@@ -15,7 +15,7 @@ def main():
                 data.LambdaString(),
                 data.BinaryString(),
                 layout.RandomizeNames()
-                ]
+            ]
             for i, t in enumerate(transformations):
                 wrapper = cst.MetadataWrapper(tree)
                 tree = wrapper.visit(t)
@@ -24,6 +24,7 @@ def main():
                 # Most specify encoding in output file due to binary string obfuscation
                 out_file.write("# -*- coding: utf-8 -*\n")
                 out_file.write(obfus.code)
+
 
 if __name__ == "__main__":
     main()
