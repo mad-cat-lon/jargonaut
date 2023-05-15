@@ -1,9 +1,8 @@
-import ast 
+import libcst as cst 
 from math import ceil, log
-import astpretty
 
 
-class LambdaString(ast.NodeTransformer):
+class LambdaString(cst.CSTTransformer):
     """
     Obfuscates string literals by converting them to an extremely
     opaque lambda expression
@@ -42,18 +41,30 @@ class LambdaString(ast.NodeTransformer):
             num = diff if num > 0 else -diff
         return result
 
-    def visit_Constant(self, node: ast.Constant):
-        if isinstance(node.value, str):
-            codes = [ord(c) for c in node.value]
+    def visit_Call(self, node: cst.Call):
+        # This implementation breaks open(filename, mode) so we avoid it 
+        if isinstance(node.func, cst.Name):
+            if node.func.value == "open":
+                return False 
+
+    def leave_SimpleString(
+        self,
+        original_node: cst.SimpleString,
+        updated_node: cst.SimpleString
+    ):
+        # Only convert strings of len > 3 
+        if len(original_node.value) > 3:
+            codes = [ord(c) for c in original_node.value]
             num = sum(codes[i] * 256 ** i for i in range(len(codes)))
             obfus = self.convert(num)
+            # TODO: Change from f-string to actual code to prevent AttributeError
             decode_func = f"(lambda _, __, ___, ____, _____, ______, _______, ________:\
     (lambda _, __, ___: _(_, __, ___))(\
             lambda _, __, ___:\
                 bytes([___ % __]) + _(_, __, ___ // __) if ___ else\
                 (lambda: _).__code__.co_lnotab,\
             _ << ________,\
-           {obfus}\
+            {obfus}\
         )\
     )(\
         *(lambda _, __, ___: _(_, __, ___))(\
@@ -73,8 +84,7 @@ class LambdaString(ast.NodeTransformer):
                 lambda _, __, ___, ____, _____, ______, _______, ________: _\
             )\
         )\
-    ).decode('utf-8')"
-            # astpretty.pprint(ast.parse(decode_func))
-            final = ast.parse(decode_func).body[0]
-            return final.value
-        return node
+    ).decode(\"utf-8\")"
+            result = cst.parse_expression(decode_func)
+            return result
+        return original_node
