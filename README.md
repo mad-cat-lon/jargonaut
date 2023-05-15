@@ -1,5 +1,5 @@
-# unicloak ![pep-8](https://github.com/xor-eax-eax-ret/unicloak/actions/workflows/pep8.yml/badge.svg)
-`unicloak` is an obfuscator for protecting Python code with a few novel features. Note that this is a work in progress! 
+# jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg)
+`jargonaut` is an obfuscator for protecting Python code with a few novel features. Note that this is a work in progress! 
 
 ## Features
 - Basic variable, function and parameter renaming (more coming soon)
@@ -129,6 +129,7 @@ if _︳𝗇𝙖𝗺ℯ﹎＿ == (lambda jPgOQ, gnBjk='utf-8', aBtqN='surrogatepa
 ## Requirements 
 - z3-solver
 - numpy
+- libcst
 
 ## References
 - https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection
