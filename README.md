@@ -1,5 +1,5 @@
 # jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg)
-`jargonaut` is an obfuscator for protecting Python3 code with a few cool features. 
+`jargonaut` is an obfuscator for protecting Python3 code with a few cool features. Most of the techniques I have implemented or plan on implementing are ripped from these excellent [University of Arizona lecture slides](https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf). 
 
 There aren't many Python obfuscators on GitHub that:
 - actually produce functional code when some of Python's more complex features are used
@@ -17,18 +17,28 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 - String matching evasion with [Unicode identifier variants](https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection)
 - Obfuscation of integer literals and expressions with [linear mixed boolean arithmetic expressions](https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5)
 
-## Upcoming features 
-- Logging / debugging
-- Obfuscation of entire modules, not just single files
-- Type inferencing for renaming class methods and attributes 
-- Better string obfuscation methods
-- Dead code insertion
+## Planned improvements
+### Upcoming features 
 - ~Comment removal~
-- Dead parameter insertion
-- Type hint removal 
+- Type hint removal
+- Renaming class methods and attributes with type inferencing
+- Opaque predicates/expressions, with and without interdependence
+- String obfuscation using Mealy machines
+- Packing 
+- Bogus control flow 
+- Selective virtualization with custom instruction set for functions 
+- Dead code/parameter insertion 
+- Control flow flattening (chenxification)
 - C function conversion a la [pyarmor](https://github.com/dashingsoft/pyarmor)
-- Documentation
-- Better performance (maybe don't use z3 for MBA)
+- Variable splitting/merging
+- Function merging 
+### Quality of life
+- Logging / debugging
+- Obfuscation of entire modules, not just single files 
+- Documentation 
+- Better performance:
+    - I'm not using LibCST to its full extent due to lack of knowledge/skill, and I know for a fact the way I perform transformations is suboptimal 
+    - I know using Z3 for linear algebra is probably kind of weird and inefficient. I just couldn't figure out how to do it with `numpy` or `scipy` - if you can figure out a better way, please submit a PR! 
 
 ## Usage
 ```main.py source.py obfuscated.py```
