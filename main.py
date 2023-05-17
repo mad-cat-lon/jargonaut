@@ -25,8 +25,6 @@ def main():
             ]
             for i, t in enumerate(transformations):
                 wrapper = cst.MetadataWrapper(tree)
-                # manager = FullRepoManager(".", {"full_test.py"}, {TypeInferenceProvider})
-                # wrapper = cst.MetadataWrapper(tree, cache=manager.get_cache_for_path("full_test.py"))
                 tree = wrapper.visit(t)
             obfus = tree
             with open(sys.argv[2], "w", encoding="utf-8") as out_file:

@@ -13,14 +13,9 @@ class PatchReturn(cst.CSTTransformer):
                 ....
             patch_bytecode("Will actually be returned")
             return "Won't be returned"
-    Note that this only works for functions with a single ret statement, and is implemented very poorly
     """
     # TODO: Do insertion of import inspect, from ctypes import memmove
     METADATA_DEPENDENCIES = (ScopeProvider,)
-    
-    def visit(self):
-        print("[-] Patching bytecode...")
-        super().visit()
 
     def leave_FunctionDef(self, original_node: FunctionDef, updated_node: FunctionDef) -> None:
         # Go inside indented block (body=IndentedBlock)
@@ -47,16 +42,16 @@ class PatchReturn(cst.CSTTransformer):
             # Insert the func definition      
             patched_body.insert(idx, func)
             # Insert call to the func we made before the original ret statement
-            old_ret_val = patched_body[idx+1].body[0].value
+            old_ret_val = patched_body[idx + 1].body[0].value
             patched_body.insert(
-                idx+1,
+                idx + 1,
                 cst.SimpleStatementLine(
                     body=[
                         cst.Expr(
                             value=cst.Call(
                                 func=cst.Name(
                                     value=func_name
-                                ),  
+                                ), 
                                 args=[
                                     cst.Arg(
                                         value=old_ret_val
@@ -70,7 +65,7 @@ class PatchReturn(cst.CSTTransformer):
             # Replace the original ret statement's value with something else
             # Just a string literal for now - in the future we could make this return random
             # variables in the parent function's scope, etc. for maximum confusion
-            patched_body[idx+2] = cst.SimpleStatementLine(
+            patched_body[idx + 2] = cst.SimpleStatementLine(
                 body=[
                     cst.Return(
                         value=cst.SimpleString(
