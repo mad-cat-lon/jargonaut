@@ -52,12 +52,13 @@ class LambdaString(cst.CSTTransformer):
         original_node: cst.SimpleString,
         updated_node: cst.SimpleString
     ):
-        # Only convert strings of len > 3 
-        if len(original_node.value) > 3:
+        # Only convert strings of len > 3 and don't convert strings with prefixes
+        if len(original_node.value) > 3 and not original_node.prefix:
             codes = [ord(c) for c in original_node.value]
             num = sum(codes[i] * 256 ** i for i in range(len(codes)))
             obfus = self.convert(num)
             # TODO: Change from f-string to actual code to prevent AttributeError
+            # Source: https://benkurtovic.com/2014/06/01/obfuscating-hello-world.html
             decode_func = f"(lambda _, __, ___, ____, _____, ______, _______, ________:\
     (lambda _, __, ___: _(_, __, ___))(\
             lambda _, __, ___:\
@@ -84,7 +85,7 @@ class LambdaString(cst.CSTTransformer):
                 lambda _, __, ___, ____, _____, ______, _______, ________: _\
             )\
         )\
-    ).decode(\"utf-8\")"
+    ).decode(\"utf-8\")[1:-1]"
             result = cst.parse_expression(decode_func)
             return result
         return original_node
