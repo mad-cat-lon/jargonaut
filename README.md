@@ -8,7 +8,7 @@ There aren't many Python obfuscators on GitHub that:
 
 This is probably because more advanced obfuscation techniques (especially ones that touch control flow) are pretty difficult to implement for a dynamically typed language that was built around readibility and simplicity! `jargonaut` aims to fill this gap - check out the Upcoming Features section for planned additions.
 
-Note that this is a proof-of-concept and a work in progress. You should not be using this for anything serious - not only is `jargonaut` probably going to introduce bugs, but deobfuscation will likely be a trivial task until more features are implemented. 
+Note that this is a proof-of-concept and a work in progress. You should not be using this for anything serious - not only is `jargonaut` probably going to introduce bugs, but deobfuscation will likely be trivial until more features are implemented. 
 
 ## Features
 - Basic variable, function and parameter renaming (more coming soon)
