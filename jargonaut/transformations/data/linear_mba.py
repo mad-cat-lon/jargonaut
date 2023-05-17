@@ -110,50 +110,56 @@ class LinearMBA(cst.CSTTransformer):
             terms_to_edit = [(0, 1)]
         elif isinstance(original_node.operator, cst.BitOr):
             terms_to_edit = [(6, 1)]
+        if terms_to_edit is None:
+            return updated_node
+        # TODO: Replace with matcher-based solution
         if (
-            isinstance(original_node.left, cst.Name)
-            and isinstance(original_node.right, cst.Name)
+            isinstance(original_node.left, cst.List)
+            or isinstance(original_node.right, cst.List)
+            or isinstance(original_node.left, cst.BinaryOperation)
+            or isinstance(original_node.right, cst.BinaryOperation)
+            or isinstance(original_node.left, cst.UnaryOperation)
+            or isinstance(original_node.right, cst.UnaryOperation)
         ):
-            if terms_to_edit is None:
-                return original_node
-            terms = generate_terms(NUM_TERMS)
-            for idx, val in terms_to_edit:
-                terms[idx] += val
-            result = []
-            for i in range(15):
-                expression = func_list[i](x=original_node.left, y=original_node.right)
-                if terms[i] != 0:
-                    # For some reason libCST won't let us do Integer(-1) 
-                    if terms[i] > 0:
-                        result.append(
-                            cst.BinaryOperation(
-                                left=cst.Integer(str(terms[i])),
-                                operator=cst.Multiply(),
-                                right=expression
-                            )
+            
+            return updated_node 
+        terms = generate_terms(NUM_TERMS)
+        for idx, val in terms_to_edit:
+            terms[idx] += val
+        result = []
+        for i in range(15):
+            expression = func_list[i](x=original_node.left, y=original_node.right)
+            if terms[i] != 0:
+                # For some reason libCST won't let us do Integer(-1) 
+                if terms[i] > 0:
+                    result.append(
+                        cst.BinaryOperation(
+                            left=cst.Integer(str(terms[i])),
+                            operator=cst.Multiply(),
+                            right=expression
                         )
-                    else:
-                        result.append(
-                            cst.BinaryOperation(
-                                left=cst.UnaryOperation(
-                                    operator=cst.Minus(),
-                                    expression=cst.Integer(str(terms[i])[1:])
-                                ),
-                                operator=cst.Multiply(),
-                                right=expression
-                            )
+                    )
+                else:
+                    result.append(
+                        cst.BinaryOperation(
+                            left=cst.UnaryOperation(
+                                operator=cst.Minus(),
+                                expression=cst.Integer(str(terms[i])[1:])
+                            ),
+                            operator=cst.Multiply(),
+                            right=expression
                         )
-            # Now we have to construct the resulting expression from the array
-            result = " + ".join(cst.parse_module("").code_for_node(expr) for expr in result)          
-            result = cst.parse_expression(result)
-            return updated_node.with_changes(
-                left=result.left,
-                operator=result.operator,
-                right=result.right,
-                lpar=[cst.LeftParen()],
-                rpar=[cst.RightParen()]
-            )
-        return updated_node
+                    )
+        # Now we have to construct the resulting expression from the array
+        result = " + ".join(cst.parse_module("").code_for_node(expr) for expr in result)          
+        result = cst.parse_expression(result)
+        return updated_node.with_changes(
+            left=result.left,
+            operator=result.operator,
+            right=result.right,
+            lpar=[cst.LeftParen()],
+            rpar=[cst.RightParen()]
+        )
 
     def leave_Integer(
         self,
