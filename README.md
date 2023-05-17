@@ -33,6 +33,7 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 ## Usage
 ```main.py source.py obfuscated.py```
 `jargonaut` uses Instagram's [LibCST](https://github.com/Instagram/LibCST) for source code transformations. A transformation is a single operation on the source code's CST, like replacing string literals with obfuscated expressions, or removing comments.
+
 You can configure which transformations are applied and their order of application in `main.py`
 
 ## Requirements 
