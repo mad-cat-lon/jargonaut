@@ -60,7 +60,8 @@ You can configure which transformations are applied and their order of applicati
 - https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5
 - https://theses.hal.science/tel-01623849/document
 - https://bbs.kanxue.com/thread-271574.htm
-
+- https://libcst.readthedocs.io
+- https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf
 ## Example
 ### Source code
 ```
