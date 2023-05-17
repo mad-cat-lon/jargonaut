@@ -1,14 +1,17 @@
 # jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg)
-`jargonaut` is an obfuscator for protecting Python code with a few novel features. Note that this is a work in progress! 
+`jargonaut` is an obfuscator for protecting Python code with a few cool features. I originally made this to play with Python's [Unicode support](https://peps.python.org/pep-0672/#normalizing-identifiers), but eventually started working on a fully-featured Python obfuscator. There aren't many Python obfuscators on GitHub that actually produce functional code when some of Python's more complex features are used, and most of them are either a combination of variable renaming, Base64 encoding and `marshal`/`eval` spam. This is probably because more advanced obfuscation techniques, especially ones that touch control flow, are pretty difficult to implement for a dynamically typed language that was built around readibility and simplicity! `jargonaut` aims to fill this gap - check out the Upcoming Features section for planned additions.
+Note that this is a proof-of-concept and a work in progress. You should not be using this for anything serious - not only is `jargonaut` probably going to introduce bugs, but deobfuscation will likely be a trivial task until more features are implemented. 
 
 ## Features
 - Basic variable, function and parameter renaming (more coming soon)
-- Very basic string obfuscation 
+- Obfuscation of function return values with runtime bytecode patching (work in progress)
+- Multiple string obfuscation methods with lambda expressions and others 
 - String matching evasion with [Unicode identifier variants](https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection)
-- [Linear mixed boolean arithmetic expressions](https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5)
+- Obfuscation of integer literals and expressions with [linear mixed boolean arithmetic expressions](https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5)
 
 ## Upcoming features 
 - Logging / debugging
+- Obfuscation of entire modules, not just single files
 - Type inferencing for renaming class methods and attributes 
 - Better string obfuscation methods
 - Dead code insertion
