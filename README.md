@@ -1,5 +1,13 @@
 # jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg)
-`jargonaut` is an obfuscator for protecting Python code with a few cool features. I originally made this to play with Python's [Unicode support](https://peps.python.org/pep-0672/#normalizing-identifiers), but eventually started working on a fully-featured Python obfuscator. There aren't many Python obfuscators on GitHub that actually produce functional code when some of Python's more complex features are used, and most of them are either a combination of variable renaming, Base64 encoding and `marshal`/`eval` spam. This is probably because more advanced obfuscation techniques, especially ones that touch control flow, are pretty difficult to implement for a dynamically typed language that was built around readibility and simplicity! `jargonaut` aims to fill this gap - check out the Upcoming Features section for planned additions.
+`jargonaut` is an obfuscator for protecting Python3 code with a few cool features. 
+
+There aren't many Python obfuscators on GitHub that:
+- actually produce functional code when some of Python's more complex features are used
+- aren't just a combination of variable renaming, Base64 encoding and `marshal`/`eval` spam
+- aren't abandoned / deprecated 
+
+This is probably because more advanced obfuscation techniques (especially ones that touch control flow) are pretty difficult to implement for a dynamically typed language that was built around readibility and simplicity! `jargonaut` aims to fill this gap - check out the Upcoming Features section for planned additions.
+
 Note that this is a proof-of-concept and a work in progress. You should not be using this for anything serious - not only is `jargonaut` probably going to introduce bugs, but deobfuscation will likely be a trivial task until more features are implemented. 
 
 ## Features
