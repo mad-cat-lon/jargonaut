@@ -10,5 +10,5 @@ class RemoveComments(cst.CSTTransformer):
         self,
         original_node: cst.Comment,
         updated_node: cst.Comment
-    ) -> cst.Comment:
+    ) -> cst.RemovalSentinel:
         return cst.RemoveFromParent()
