@@ -9,7 +9,9 @@ class LambdaString(cst.CSTTransformer):
     """
     def __init__(self, avoid=None):
         self.avoid = avoid
-    
+        self.first_visit = True 
+        self.progress_msg = "[-] Obfuscating string literals with lambda expressions..."
+
     def encode(self, num, depth):
         if num == 0:
             return "_ - _"
@@ -52,12 +54,14 @@ class LambdaString(cst.CSTTransformer):
         original_node: cst.SimpleString,
         updated_node: cst.SimpleString
     ):
+        if self.first_visit is True:
+            print(self.progress_msg)
+            self.first_visit = False 
         # Only convert strings of len > 3 and don't convert strings with prefixes
         if len(original_node.value) > 3 and not original_node.prefix:
             codes = [ord(c) for c in original_node.value]
             num = sum(codes[i] * 256 ** i for i in range(len(codes)))
             obfus = self.convert(num)
-            # TODO: Change from f-string to actual code to prevent AttributeError
             # Source: https://benkurtovic.com/2014/06/01/obfuscating-hello-world.html
             decode_func = f"(lambda _, __, ___, ____, _____, ______, _______, ________:\
     (lambda _, __, ___: _(_, __, ___))(\
