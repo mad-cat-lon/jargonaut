@@ -13,11 +13,21 @@ class PatchReturn(cst.CSTTransformer):
                 ....
             patch_bytecode("Will actually be returned")
             return "Won't be returned"
+    WARNING: this transformation breaks Nuitka! 
+    https://nuitka.net/doc/user-manual.html#the-co-code-attribute-of-code-objects
     """
     # TODO: Do insertion of import inspect, from ctypes import memmove
     METADATA_DEPENDENCIES = (ScopeProvider,)
 
+    def __init__(self, avoid=None):
+        self.avoid = avoid
+        self.first_visit = True
+        self.progress_msg = "[-] Inserting bytecode runtime patches for function return values..."
+
     def leave_FunctionDef(self, original_node: FunctionDef, updated_node: FunctionDef) -> None:
+        if self.first_visit is True:
+            print(self.progress_msg)
+            self.first_visit = False
         # Go inside indented block (body=IndentedBlock)
         patched_body = list(original_node.body.body)
         ret_idx = []
