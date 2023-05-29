@@ -36,5 +36,6 @@ def main():
                 out_file.write(obfus.code)
             print("[-] Done.")
 
+
 if __name__ == "__main__":
     main()

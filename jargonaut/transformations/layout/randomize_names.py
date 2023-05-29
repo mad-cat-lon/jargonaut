@@ -76,10 +76,9 @@ class RandomizeNames(cst.CSTTransformer):
         else:
             qualified_name = qualified_name[0]
             scope = self.get_metadata(ScopeProvider, original_node)
+            # Don't change names for class methods or attributes yet
             if not isinstance(scope, ClassScope):
-                # Don't change names for class methods until we have type inferencing with mypy built in
                 if qualified_name.name in self.randomize_map:
-                    # print(f"{qualified_name}.name -> {self.randomize_map[qualified_name.name]}")
                     return updated_node.with_changes(
                         value=self.randomize_map[qualified_name.name]
                     )
