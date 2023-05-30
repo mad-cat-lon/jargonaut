@@ -41,7 +41,8 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
     - I know using Z3 for linear algebra is probably kind of weird and inefficient. I just couldn't figure out how to do it with `numpy` or `scipy` - if you can figure out a better way, please submit a PR! 
 
 ## Usage
-```usage: jargonaut [-h] [-in_file IN_FILE] [-out_file OUT_FILE] [--inference]
+```
+usage: jargonaut [-h] [-in_file IN_FILE] [-out_file OUT_FILE] [--inference]
 
 jargonaut - reliable and configurable Python to Python obfuscation
 
@@ -49,7 +50,8 @@ optional arguments:
   -h, --help          show this help message and exit
   -in_file IN_FILE    path to target file
   -out_file OUT_FILE  path to obfuscated file
-  --inference         use pyre's type inference. Linux/WSL only.```
+  --inference         use pyre's type inference. Linux/WSL only.
+```
  
 `jargonaut` uses Instagram's [LibCST](https://github.com/Instagram/LibCST) for source code transformations. A transformation is a single operation on the source code's CST, like replacing string literals with obfuscated expressions, or removing comments.
 
