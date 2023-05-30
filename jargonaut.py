@@ -47,10 +47,6 @@ def main():
         transformations = [
             # Patch function return values
             control.PatchReturns(),
-            # Replace string literals with lambda functions
-            data.LambdaString(),
-            # Obfuscate builtin calls
-            data.HideBuiltinCalls(),
             # Replace integer literals and binay operations with linear MBAs
             # You can set the recursion depth up to 30 if desired
             data.LinearMBA(
@@ -58,6 +54,10 @@ def main():
                 super_expr_depth=[3, 7],
                 inference=do_inference
             ),
+            # Replace string literals with lambda functions
+            data.LambdaString(),
+            # Obfuscate builtin calls
+            data.HideBuiltinCalls(),
             # Randomize names
             layout.RandomizeNames(),
             # Remove comments
