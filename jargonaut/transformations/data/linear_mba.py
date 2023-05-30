@@ -3,71 +3,15 @@ import libcst as cst
 # import numpy as np
 import random 
 # from z3 import Int, Sum, And, Solver, sat
-import platform
 from libcst.metadata import ParentNodeProvider, TypeInferenceProvider, PositionProvider
-import os
-script_dir = os.path.dirname(__file__) 
-
-
-def get_data(operator: cst.BaseBinaryOp, depth):
-    system = platform.system()
-    if system == "Windows":
-        data_path = "mba_data\\"
-    elif system == "Darwin" or system == "Linux":
-        data_path = "mba_data/"
-    if isinstance(operator, cst.Add):
-        data_path += f"add_depth{depth}.txt"
-    elif isinstance(operator, cst.Subtract):
-        data_path += f"sub_depth{depth}.txt"
-    elif isinstance(operator, cst.BitAnd):
-        data_path += f"and_depth{depth}.txt"
-    elif isinstance(operator, cst.BitOr):
-        data_path += f"or_depth{depth}.txt"
-    elif isinstance(operator, cst.BitXor):
-        data_path += f"xor_depth{depth}.txt"
-    else: 
-        return False
-    abs_path = os.path.join(script_dir, data_path)
-    with open(abs_path) as f:
-        data = [line.replace("\n", "") for line in f.readlines()]
-        return data
-
-
-def rewrite_expr(node: cst.BinaryOperation, depth=2):
-    operator = node.operator
-    expr_dataset = get_data(operator, depth)
-    if expr_dataset is False:
-        return node
-    mba_expr = random.choice(expr_dataset)
-    # print("="*80)
-    # print(f"mba_expr: {mba_expr} -> {cst.parse_module('').code_for_node(node)}")
-    left_as_code = "(" + cst.parse_module("").code_for_node(node.left) + ")"
-    right_as_code = "(" + cst.parse_module("").code_for_node(node.right) + ")"
-    # Prevent clashes in case we use the same var as the expression
-    x_name = ''.join(random.choices("abcdef", k=10))
-    y_name = ''.join(random.choices("abcdef", k=10))
-    mba_expr = mba_expr.replace("x", x_name)
-    mba_expr = mba_expr.replace("y", y_name)
-    mba_expr = mba_expr.replace(x_name, left_as_code)
-    # print(f"mba-expr sub left: {mba_expr}")
-    mba_expr = mba_expr.replace(y_name, right_as_code)
-    # print(f"mba-expr sub right: {mba_expr}")
-    mba_expr = cst.parse_expression(mba_expr)
-    # print(f"final: {cst.parse_module('').code_for_node(mba_expr)}")
-    # print("="*80)
-    return mba_expr
+from mba_utils import rewrite_expr
 
 
 class LinearMBA(cst.CSTTransformer):
     """
     Converts constants and binary operations into linear mixed boolean arithmetic expressions
     """
-    METADATA_DEPENDENCIES = (
-        ParentNodeProvider,
-        TypeInferenceProvider,
-        PositionProvider,
-    )
-    
+
     def __init__(
         self, 
         sub_expr_depth=[1, 2], 
