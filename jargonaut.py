@@ -6,7 +6,7 @@ import platform
 import os
 
 
-def main():
+def handle_args():
     prog = "jargonaut"
     description = "jargonaut - reliable and configurable Python to Python obfuscation"
     parser = argparse.ArgumentParser(
@@ -29,18 +29,28 @@ def main():
         action="store_true"
     )
     args = parser.parse_args()
+    return args
+
+
+def main():
+    args = handle_args()
     do_inference = args.inference
     if do_inference is False:
-        print("[!] Type inferencing with is not enabled. Obfuscated code may not be reliable.")
+        print("[!] Type inferencing with pyre is not enabled. Obfuscated code may not be reliable.")
     else:
         system = platform.system()
         if system == "Windows":
             print("[!] Pyre is not currently supported on Windows.")
+            exit()
     with open(args.in_file, "r", encoding="utf-8") as in_file:
         tree = cst.parse_module(in_file.read())
         transformations = [
             # Patch function return values
             control.PatchReturns(),
+            # Replace string literals with lambda functions
+            data.LambdaString(),
+            # Obfuscate builtin calls
+            data.HideBuiltinCalls(),
             # Replace integer literals and binay operations with linear MBAs
             # You can set the recursion depth up to 30 if desired
             data.LinearMBA(
@@ -48,10 +58,6 @@ def main():
                 super_expr_depth=[3, 7],
                 inference=do_inference
             ),
-            # Replace string literals with lambda functions
-            data.LambdaString(),
-            # Obfuscate builtin calls
-            data.HideBuiltinCalls(),
             # Randomize names
             layout.RandomizeNames(),
             # Remove comments
@@ -79,7 +85,7 @@ def main():
             out_file.write("from ctypes import memmove\n")
             out_file.write(obfus)
         print("[-] Done.")
-
+        
 
 if __name__ == "__main__":
     main()
