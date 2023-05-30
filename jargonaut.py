@@ -14,23 +14,23 @@ def main():
     )
     parser.add_argument(
         "-in_file",
-        help="path to target file",
+        help="Path to target file",
     )
     parser.add_argument(
         "-out_file",
-        help="path to obfuscated file",
+        help="Path to obfuscated file",
     )
     parser.add_argument(
         "--inference",
         default=False,
         dest="inference",
-        help="use pyre's type inference. Linux/WSL only.",
+        help="Use pyre for type inferencing for more stable code generation. Linux/WSL only.",
         action="store_true"
     )
     args = parser.parse_args()
     do_inference = args.inference
     if do_inference is False:
-        print("[!] Type inference is not enabled. Obfuscated code may not be reliable.")
+        print("[!] Type inferencing with is not enabled. Obfuscated code may not be reliable.")
     else:
         system = platform.system()
         if system == "Windows":
