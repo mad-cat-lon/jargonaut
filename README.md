@@ -1,5 +1,5 @@
 # jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg)
-`jargonaut` is a Python to Python obfuscator with a few cool features. Most of the techniques I have implemented or plan on implementing are ripped from these excellent [University of Arizona lecture slides](https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf). 
+`jargonaut` is a Python to Python obfuscator built on Instagram's LibCST with a few cool features. Most of the techniques I have implemented or plan on implementing are ripped from these excellent [University of Arizona lecture slides](https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf). 
 
 There aren't many Python obfuscators on GitHub that:
 - actually produce functional code when some of Python's more complex features are used
@@ -40,6 +40,11 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
     - I'm not using LibCST to its full extent due to lack of knowledge/skill, and I know for a fact the way I perform transformations is suboptimal 
     - I know using Z3 for linear algebra is probably kind of weird and inefficient. I just couldn't figure out how to do it with `numpy` or `scipy` - if you can figure out a better way, please submit a PR! 
 
+## Setup 
+`jargonaut` uses pyre for type inference. As of right now, pyre is only used during MBA expression generation to avoid transforming string concatenation with variables. If you don't use type inferencing, **there is a significant chance that the obfuscated code will contain errors.** Also note that pyre is not supported on Windows - for stability, you should be using OSX, Linux or WSL. Instructions for installing and setting up pyre can be found [here](https://pyre-check.org/docs/getting-started/).
+
+After installing pyre, place the file you would like to obfuscate in `jargonaut`'s repo directory and run `pyre init`. The pyre server will then be initialized and monitor the directory for changes during the obfuscation process. Support for files in outside directories and automatic installation, setup and configuaration of pyre will come later. 
+
 ## Usage
 ```
 usage: jargonaut [-h] [-in_file IN_FILE] [-out_file OUT_FILE] [--inference]
@@ -57,10 +62,20 @@ optional arguments:
 
 You can configure which transformations are applied and their order of application in `jargonaut.py`
 
+## Known/common issues 
+- `PatchReturns()` won't work if the obfuscated code is compiled with [Nuitka](https://github.com/Nuitka/Nuitka). This is because the transformation relies on patching function bytecode and Nuitka directly compiles Python to C++. 
+- `pyre init` is unable to locate typeshed. To resolve this, clone [typeshed](https://github.com/python/typeshed) and enter the path as 
+`path_to_typeshed/typeshed` and it should work
+
+## Examples 
+View the examples folder if you would like to see this in action. 
+
 ## Requirements 
 - z3-solver
 - numpy
 - libcst
+- pyre
+- watchman 
 
 ## References
 - https://blog.phylum.io/malicious-actors-use-unicode-support-in-python-to-evade-detection
@@ -73,6 +88,3 @@ You can configure which transformations are applied and their order of applicati
 - https://bbs.kanxue.com/thread-271574.htm
 - https://libcst.readthedocs.io
 - https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf
-
-## Examples 
-View the examples folder if you would like to see this in action. 
