@@ -54,8 +54,9 @@ class HideBuiltinCalls(cst.CSTTransformer):
                 elif hasattr(obj, "__class__"):
                     if hasattr(obj.__class__, "__name__"):
                         if name != func_name and (obj.__class__.__name__).find(stack[0]) != -1:
+                            classname = obj.__class__.__name__
                             result.append(
-                                f"{name}.__class__.__name__[{(obj.__class__.__name__).find(stack[0])}]"
+                                f"{name}.__class__.__name__[{classname.find(stack[0])}]"
                             )
                             stack.pop(0)
                             break
