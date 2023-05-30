@@ -3,6 +3,7 @@ import libcst as cst
 from libcst.metadata import FullRepoManager, TypeInferenceProvider
 import argparse 
 import platform
+import os
 
 
 def main():
@@ -59,7 +60,7 @@ def main():
         for i, t in enumerate(transformations):
             if do_inference is True:
                 manager = FullRepoManager(
-                    ".",
+                    os.path.dirname(args.in_file),
                     {args.in_file},
                     {TypeInferenceProvider}
                 )
