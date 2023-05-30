@@ -43,7 +43,7 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 ## Setup 
 `jargonaut` uses pyre for type inference. As of right now, pyre is only used during MBA expression generation to avoid transforming string concatenation with variables. If you don't use type inferencing, **there is a significant chance that the obfuscated code will contain errors.** Also note that pyre is not supported on Windows - for stability, you should be using OSX, Linux or WSL. Instructions for installing and setting up pyre can be found [here](https://pyre-check.org/docs/getting-started/).
 
-After installing pyre, place the file you would like to obfuscate in `jargonaut`'s repo directory and run `pyre init`. The pyre server will then be initialized and monitor the directory for changes during the obfuscation process. Support for files in outside directories and automatic installation, setup and configuaration of pyre will come later. 
+After installing pyre, place the file you would like to obfuscate in `jargonaut`'s repo directory and run `pyre init`. The pyre server will then be initialized and monitor the directory for changes during the obfuscation process. Support for files in outside directories and automatic installation, setup and configuaration of pyre will come later. You will need to ensure that the pyre server is running by running `pyre` before running `jargonaut.py`
 
 ## Usage
 ```
