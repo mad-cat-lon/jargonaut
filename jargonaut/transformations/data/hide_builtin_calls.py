@@ -65,11 +65,7 @@ class HideBuiltinCalls(cst.CSTTransformer):
                                 stack.pop(0)
                                 break
             result = "+".join(result)
-            print(eval(result))
-            print(func_name)
-            print(stack)
             if len(stack) == 0 and eval(result) == func_name:
-                print("RETURNING TRUE")
                 return result
             else:
                 pass 
