@@ -4,7 +4,7 @@ import libcst as cst
 import random 
 # from z3 import Int, Sum, And, Solver, sat
 import platform
-from libcst.metadata import ParentNodeProvider
+from libcst.metadata import ParentNodeProvider, TypeInferenceProvider, PositionProvider
 import os
 script_dir = os.path.dirname(__file__) 
 
@@ -64,14 +64,33 @@ class LinearMBA(cst.CSTTransformer):
     """
     METADATA_DEPENDENCIES = (
         ParentNodeProvider,
+        TypeInferenceProvider,
+        PositionProvider,
     )
     
-    def __init__(self, sub_expr_depth=[1, 3], super_expr_depth=[1, 4]):
+    def __init__(
+        self, 
+        sub_expr_depth=[1, 2], 
+        super_expr_depth=[2, 20],
+        inference=False
+    ):
+        self.inference = inference
         self.sub_expr_depth = sub_expr_depth
         self.super_expr_depth = super_expr_depth
         self.first_visit = True
         self.progress_msg = "[-] Obfuscating expressions with linear MBA expressions..."
-
+        if inference is False:
+            LinearMBA.METADATA_DEPENDENCIES = (
+                ParentNodeProvider,
+                PositionProvider,
+            )
+        else:
+            LinearMBA.METADATA_DEPENDENCIES = (
+                ParentNodeProvider,
+                TypeInferenceProvider,
+                PositionProvider,
+            )
+    
     def leave_BinaryOperation(
         self,
         original_node: cst.BinaryOperation,
@@ -80,6 +99,44 @@ class LinearMBA(cst.CSTTransformer):
         if self.first_visit is True:
             print(self.progress_msg)
             self.first_visit = False
+        if self.inference is True:
+            # We need to account for string literal concatenation 
+            # "abc" + "def" counts as a BinaryOperatiojn
+            # https://lwn.net/Articles/551426/
+            if (
+                isinstance(original_node.left, cst.SimpleString)
+                or isinstance(original_node.right, cst.SimpleString)
+            ):
+                return original_node
+            # Account for the case where we have the following:
+            # a = "abcd"
+            # b = "efgh"
+            # a + b
+            if original_node.left and original_node.right:
+                left_inferred_type = None
+                right_inferred_type = None
+                # Handle KeyErrors from pyre
+                try:
+                    left_inferred_type = self.get_metadata(
+                        TypeInferenceProvider,
+                        original_node.left
+                    )
+                except KeyError:
+                    pass
+                try:
+                    right_inferred_type = self.get_metadata(
+                        TypeInferenceProvider,
+                        original_node.right
+                    )
+                except KeyError:
+                    pass
+                if left_inferred_type and right_inferred_type:
+                    if (
+                        isinstance(left_inferred_type, cst.SimpleString)
+                        or isinstance(right_inferred_type, cst.SimpleString)
+                    ):
+                        return original_node
+                    return original_node
         parent_node = self.get_metadata(ParentNodeProvider, original_node)
         if isinstance(parent_node, cst.BinaryOperation):
             mba_expr = rewrite_expr(
