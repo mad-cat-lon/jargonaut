@@ -1,1 +1,1 @@
-from jargonaut.transformations.control.patch_return import PatchReturn
+from jargonaut.transformations.control.patch_return import PatchReturns

@@ -4,7 +4,7 @@ import libcst as cst
 import random
 
 
-class PatchReturn(cst.CSTTransformer):
+class PatchReturns(cst.CSTTransformer):
     """
     Does runtime bytecode patching to obscure the real return value of functions
     Example:
