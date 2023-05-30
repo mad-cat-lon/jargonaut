@@ -27,7 +27,6 @@ class HideBuiltinCalls(cst.CSTTransformer):
         # WARNING: string concatenation counts as a BinaryOperation, so don't apply this
         # before LinearMBA unless you want to waste a lot of time and energy.
         # https://lwn.net/Articles/551426/
-        stack = [c for c in func_name]
         result = []
         builtins_dict = __builtins__
 
@@ -39,34 +38,46 @@ class HideBuiltinCalls(cst.CSTTransformer):
         if "__spec__" in builtins_dict.keys():
             del builtins_dict["__spec__"]
 
-        while len(stack) > 0:
-            builtins_shuffled = list(builtins_dict)
-            random.shuffle(builtins_shuffled)
-            builtins_shuffled = {key: builtins_dict[key] for key in builtins_shuffled}
-            for name, obj in builtins_shuffled.items():
-                if hasattr(obj, "__name__"):
-                    if name != func_name and (obj.__name__).find(stack[0]) != -1:
-                        result.append(
-                            f"{name}.__name__[{(obj.__name__).find(stack[0])}]"
-                        )
-                        stack.pop(0)
-                        break
-                elif hasattr(obj, "__class__"):
-                    if hasattr(obj.__class__, "__name__"):
-                        if name != func_name and (obj.__class__.__name__).find(stack[0]) != -1:
-                            classname = obj.__class__.__name__
+        # Quick hack to retry in case we generated it wrong
+        # TODO: Fix root issue with how hasattr() is being used
+        while True:
+            stack = [c for c in func_name]
+            result = []
+            while len(stack) > 0:
+                builtins_shuffled = list(builtins_dict)
+                random.shuffle(builtins_shuffled)
+                builtins_shuffled = {key: builtins_dict[key] for key in builtins_shuffled}
+                for name, obj in builtins_shuffled.items():
+                    if hasattr(obj, "__name__"):
+                        if name != func_name and (obj.__name__).find(stack[0]) != -1:
                             result.append(
-                                f"{name}.__class__.__name__[{classname.find(stack[0])}]"
+                                f"{name}.__name__[{(obj.__name__).find(stack[0])}]"
                             )
                             stack.pop(0)
                             break
-                        
-        # TODO: Add more confusion 
-        # For example, instead of doing list.__class__.__name__ we can do something like:
-        # [1, 3, 43, 5, 6, "\x00", "\xef"].__class__.__name__
-        # Or even better, we can find names of the same type in the current scope and 
-        # construct our builtin call from those
-        return "+".join(result)
+                    elif hasattr(obj, "__class__"):
+                        if hasattr(obj.__class__, "__name__"):
+                            if name != func_name and (obj.__class__.__name__).find(stack[0]) != -1:
+                                classname = obj.__class__.__name__
+                                result.append(
+                                    f"{name}.__class__.__name__[{classname.find(stack[0])}]"
+                                )
+                                stack.pop(0)
+                                break
+            result = "+".join(result)
+            print(eval(result))
+            print(func_name)
+            print(stack)
+            if len(stack) == 0 and eval(result) == func_name:
+                print("RETURNING TRUE")
+                return result
+            else:
+                pass 
+            # TODO: Add more confusion 
+            # For example, instead of doing list.__class__.__name__ we can do something like:
+            # [1, 3, 43, 5, 6, "\x00", "\xef"].__class__.__name__
+            # Or even better, we can find names of the same type in the current scope and 
+            # construct our builtin call from those
 
     def leave_Call(
         self,
