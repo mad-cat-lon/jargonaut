@@ -73,7 +73,7 @@ def generate_zero_identity_mba(t):
         "(~(x | y))": [1, 0, 0, 0],
         "(~(x ^ y))": [1, 0, 0, 1],
         "(~y)":       [1, 0, 1, 1],
-        "(x | ~y)": [1, 0, 1, 1],
+        "(x | ~y)":   [1, 0, 1, 1],
         "(~x)":       [1, 1, 0, 0],
         "(~x | y)":   [1, 1, 0, 1],
         "(~(x & y))": [1, 1, 1, 0],
@@ -164,12 +164,13 @@ def constant_to_mba(k, as_obj=True):
     Generates an affine function and zero-identity MBA and produces an 
     equivalent MBA expression node that always evaluates to the target constant k
     """
-    zero_id_mba = generate_zero_identity_mba(7)
+    zero_id_mba = generate_zero_identity_mba(5)
     # https://sci-hub.se/https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5
     # Page 4, Proposition 2
     # Proposition is for invertible polynomials but should work on affine functions too
+    # zero_id_mba always evaluates to 0
     # if p(x) is our affine function and q(x) its inverse, then:
-    # p(q(k)) == q(zero_id_mba + p(k))
+    # p(q(k)) == q(0 + p(k)) == q(zero_id_mba + p(k))
 
     # we need to account for variable bit lengths in python
     n = random.randint(k.bit_length(), 100)
@@ -200,60 +201,4 @@ if __name__ == "__main__":
     zero_id = generate_zero_identity_mba(t=5)
     constant_to_mba(133334845454)
 
-func_list = [
-    primitives.x_and_y,
-    primitives.x_and_not_y,
-    primitives.x,
-    primitives.not_x_and_y,
-    primitives.y,
-    primitives.x_xor_y,
-    primitives.x_or_y,
-    primitives.not_inc_x_or_y,
-    primitives.not_inc_x_xor_y,
-    primitives.not_y,
-    primitives.x_or_not_y,
-    primitives.not_x,
-    primitives.not_x_or_y,
-    primitives.not_inc_x_and_y,
-    primitives.min_one
-]
-
-
-def generate_terms(expr_number):
-    if expr_number > 15:
-        expr_number = expr_number % 15
-    while True:
-        coeffs = np.zeros(15, dtype=np.int64)
-        expr_selector = np.array(
-            [random.randint(0, expr_number - 1) for _ in range(expr_number)]
-        )
-        print(expr_selector)
-        # Ax = 0
-        A = truth_table[expr_selector, :].T
-        print(A)
-        b = np.zeros(4)
-        n = len(A[0])
-        m = len(b)
-        X = [Int('x%d' % i) for i in range(n)]
-
-        s = Solver()
-        # Solution cannot be zero vector 
-        s.add(And([X[i] != 0 for i in range(n)]))
-        # Force elements to be nonzero to prevent
-        # "lame" solutions like [0, 0, 0, ..., 1, 0]
-        for i in range(n):
-            s.add(X[i] != 0)
-        # Constraints for matrix mult
-        for i in range(m):
-            s.add(Sum([A[i][j] * X[j] for j in range(n)]) == b[i])
-
-        if s.check() == sat:
-            # We found a solution! 
-            m = s.model()
-            # Might not be in order so need to sort by name first
-            sol = [m[i] for i in sorted(m, key=lambda x: x.name())]
-            for i in range(expr_number):
-                coeffs[expr_selector[i]] += int(sol[i].as_string())
-            print(coeffs)
-            return coeffs
 """
