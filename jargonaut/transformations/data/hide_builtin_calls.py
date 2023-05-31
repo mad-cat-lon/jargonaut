@@ -30,15 +30,16 @@ class HideBuiltinCalls(cst.CSTTransformer):
         result = []
         builtins_dict = __builtins__
 
-        # Handling edge cases
+        # HACK: Handling edge cases
         if "__loader__" in builtins_dict.keys():
             del builtins_dict["__loader__"]
         if "__doc__" in builtins_dict.keys():
             del builtins_dict["__doc__"]
         if "__spec__" in builtins_dict.keys():
             del builtins_dict["__spec__"]
-
-        # Quick hack to retry in case we generated it wrong
+        if "__package__" in builtins_dict.keys():
+            del builtins_dict["__package__"]
+        # HACK: Keep retrying until we've gotten the correct string
         # TODO: Fix root issue with how hasattr() is being used
         while True:
             stack = [c for c in func_name]
