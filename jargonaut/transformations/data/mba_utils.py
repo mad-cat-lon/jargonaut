@@ -73,7 +73,7 @@ def generate_zero_identity_mba(t):
         "(~(x | y))": [1, 0, 0, 0],
         "(~(x ^ y))": [1, 0, 0, 1],
         "(~y)":       [1, 0, 1, 1],
-        "(x | ~y)":   [1, 0, 1, 1],
+        "(x | ~y)": [1, 0, 1, 1],
         "(~x)":       [1, 1, 0, 0],
         "(~x | y)":   [1, 1, 0, 1],
         "(~(x & y))": [1, 1, 1, 0],
@@ -155,7 +155,7 @@ def generate_invertible_affine(n):
     b = random.randint(0, 2**n - 1)
 
     a_inv = pow(a, -1, 2**n)
-    b_inv = -a_inv*b % (2**n)
+    b_inv = -a_inv * b % (2**n)
     return (a, b), (a_inv, b_inv)
 
 
@@ -197,7 +197,6 @@ if __name__ == "__main__":
     base_expr = cst.parse_expression("x + y")
     linear_mba = rewrite_expr(base_expr)
     print("Rewrote expression: ")
-    print(f"{cst.parse_module('').code_for_node(base_expr)} -> {cst.parse_module('').code_for_node(linear_mba)}")
     zero_id = generate_zero_identity_mba(t=5)
     constant_to_mba(133334845454)
 
