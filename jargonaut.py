@@ -110,5 +110,6 @@ def main():
         if args.print_stats:
             print_stats(args.in_file, args.out_file)
 
+
 if __name__ == "__main__":
     main()
