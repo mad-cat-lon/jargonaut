@@ -49,7 +49,7 @@ def main():
             control.PatchReturns(),
             # Replace integer literals and binay operations with linear MBAs
             # You can set the recursion depth up to 30 if desired
-            data.LinearMBA(
+            data.ExprToLinearMBA(
                 sub_expr_depth=[1, 3],
                 super_expr_depth=[3, 7],
                 inference=do_inference
