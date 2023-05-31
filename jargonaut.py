@@ -28,8 +28,30 @@ def handle_args():
         help="Use pyre for type inferencing for more stable code generation. Linux/WSL only.",
         action="store_true"
     )
+    parser.add_argument(
+        "--print-stats",
+        default=True,
+        dest="print_stats",
+        help="Print statistics after obfuscation",
+        action="store_true"
+    )
     args = parser.parse_args()
     return args
+
+
+def print_stats(in_file, out_file):
+    in_file_lc = 0
+    out_file_lc = 0
+    # Calculate line count changes
+    with open(in_file, "r") as f:
+        in_file_lc = len(f.readlines())
+    with open(out_file, "r") as f:
+        out_file_lc = len(f.readlines())
+    print(f"[*] {in_file_lc} lines -> {out_file_lc} lines")
+    # Calculate file size changes 
+    in_file_size = os.stat(in_file).st_size
+    out_file_size = os.stat(out_file).st_size
+    print(f"[*] {in_file_size} bytes -> {out_file_size} bytes")
 
 
 def main():
@@ -85,7 +107,8 @@ def main():
             out_file.write("from ctypes import memmove\n")
             out_file.write(obfus)
         print("[-] Done.")
-        
+        if args.print_stats:
+            print_stats(args.in_file, args.out_file)
 
 if __name__ == "__main__":
     main()
