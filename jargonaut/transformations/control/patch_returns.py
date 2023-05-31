@@ -22,7 +22,7 @@ class PatchReturns(cst.CSTTransformer):
     def __init__(self, avoid=None):
         self.avoid = avoid
         self.first_visit = True
-        self.progress_msg = "[-] Inserting bytecode runtime patches for function return values..."
+        self.progress_msg = "[-] Patching function return values..."
 
     def leave_FunctionDef(self, original_node: FunctionDef, updated_node: FunctionDef) -> None:
         if self.first_visit is True:
