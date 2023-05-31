@@ -2,7 +2,7 @@ import libcst as cst
 from math import ceil, log
 
 
-class LambdaString(cst.CSTTransformer):
+class StringToLambdaExpr(cst.CSTTransformer):
     """
     Obfuscates string literals by converting them to an extremely
     opaque lambda expression
