@@ -86,12 +86,11 @@ class ExprToLinearMBA(cst.CSTTransformer):
                     pass
                 if left_inferred_type and right_inferred_type:
                     if (
-                        left_inferred_type == "str"
-                        or right_inferred_type == "str"
+                        left_inferred_type != "int"
+                        or right_inferred_type != "int"
                     ):
                         return original_node
-                    return original_node
-                return original_node
+                
         parent_node = self.get_metadata(ParentNodeProvider, original_node)
         if isinstance(parent_node, cst.BinaryOperation):
             mba_expr = rewrite_expr(
