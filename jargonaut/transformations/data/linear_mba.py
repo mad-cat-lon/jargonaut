@@ -4,10 +4,11 @@ import libcst as cst
 import random 
 # from z3 import Int, Sum, And, Solver, sat
 from libcst.metadata import ParentNodeProvider, TypeInferenceProvider, PositionProvider
-from mba_utils import rewrite_expr
+from libcst.metadata import ScopeProvider
+from .mba_utils import rewrite_expr, constant_to_mba
 
 
-class LinearMBA(cst.CSTTransformer):
+class ExprToLinearMBA(cst.CSTTransformer):
     """
     Converts constants and binary operations into linear mixed boolean arithmetic expressions
     """
@@ -24,15 +25,17 @@ class LinearMBA(cst.CSTTransformer):
         self.first_visit = True
         self.progress_msg = "[-] Obfuscating expressions with linear MBA expressions..."
         if inference is False:
-            LinearMBA.METADATA_DEPENDENCIES = (
+            ExprToLinearMBA.METADATA_DEPENDENCIES = (
                 ParentNodeProvider,
                 PositionProvider,
+                ScopeProvider,
             )
         else:
-            LinearMBA.METADATA_DEPENDENCIES = (
+            ExprToLinearMBA.METADATA_DEPENDENCIES = (
                 ParentNodeProvider,
                 TypeInferenceProvider,
                 PositionProvider,
+                ScopeProvider
             )
     
     def leave_BinaryOperation(
@@ -76,8 +79,8 @@ class LinearMBA(cst.CSTTransformer):
                     pass
                 if left_inferred_type and right_inferred_type:
                     if (
-                        isinstance(left_inferred_type, cst.SimpleString)
-                        or isinstance(right_inferred_type, cst.SimpleString)
+                        left_inferred_type == "str"
+                        or right_inferred_type == "str"
                     ):
                         return original_node
                     return original_node
@@ -94,6 +97,101 @@ class LinearMBA(cst.CSTTransformer):
                 depth=random.randint(*self.super_expr_depth)
             )
             return mba_expr
+
+    def leave_Integer(
+        self,
+        original_node: cst.Integer,
+        updated_node: cst.Integer
+    ):
+        if self.inference:
+            constant_mba = constant_to_mba(
+                original_node.evaluated_value,
+                as_obj=False
+            )
+            scope = self.get_metadata(ScopeProvider, original_node)
+            # Let's check if there are any integer variables in the scope we can use for confusion
+            assignments_in_scope = []
+            for assign in scope.assignments:
+                # Only take Name() for now
+                if isinstance(assign.node, cst.Name):
+                    # Check if it's in scope
+                    if assign.node.value in scope:
+                        node_pos = self.get_metadata(PositionProvider, original_node).start 
+                        assign_pos = self.get_metadata(PositionProvider, assign.node).start
+                        # HACK: Don't use the assignment unless it appears before our current node
+                        if node_pos.line > assign_pos.line:
+                            assignments_in_scope.append(assign.node)
+            # Do type inferencing here to find Name() nodes that are of type int
+            int_names = []
+            for node in assignments_in_scope:
+                # HACK: When we run PatchReturns() before this transformation,
+                # we insert a Name(value="frame") to do the patching
+                # Pyre doesn't know about this yet so we need to handle the KeyError
+                try:
+                    inferred_type = self.get_metadata(TypeInferenceProvider, node)
+                    if inferred_type == "int":
+                        int_names.append(node)
+                except KeyError:
+                    pass 
+            if int_names:
+                # Replace x and y in the constant_mba expression
+                x = random.choice(int_names)
+                y = random.choice(int_names)
+                constant_mba = constant_mba.replace("x", x.value)
+                constant_mba = constant_mba.replace("y", y.value)
+                return cst.parse_expression(constant_mba)
+            else:
+                # print("No names found, inserting statements")
+                # We have a few options here
+                # 1. Just use random integers for x and y
+                # 2. Define integer vars before the expression 
+                # 3. If inside a function, add parameters and edit all calls to include vars
+                # HACK: Doing option 1 for now: inserting statements before a node is finicky 
+                # x_name = ''.join([random.choice("abcdefghihklmnopqrstuv") for _ in range(10)])
+                # y_name = ''.join([random.choice("abcdefghihklmnopqrstuv") for _ in range(10)])
+                x_val = random.randint(0, 1000)
+                y_val = random.randint(0, 1000)
+                constant_mba = constant_mba.replace("x", str(x_val))
+                constant_mba = constant_mba.replace("y", str(y_val))
+                return cst.parse_expression(constant_mba)
+        else:
+            constant_mba = constant_to_mba(
+                int(original_node.evaluated_value),
+                as_obj=False
+            )
+            x_val = random.randint(0, 1000)
+            y_val = random.randint(0, 1000)
+            constant_mba = constant_mba.replace("x", str(x_val))
+            constant_mba = constant_mba.replace("y", str(y_val))
+            return cst.parse_expression(constant_mba)
+            """
+            x_assign = cst.Assign(
+                targets=[
+                    cst.AssignTarget(
+                        target=cst.Name(
+                            value=x_name
+                        )
+                    )
+                ],
+                value=cst.Integer(
+                    value=str(x_val)
+                )
+            )
+            y_assign = cst.Assign(
+                targets=[
+                    cst.AssignTarget(
+                        target=cst.Name(
+                            value=y_name
+                        )
+                    )
+                ],
+                value=cst.Integer(
+                    value=str(y_val)
+                )
+            )
+            return cst.FlattenSentinel([x_assign, y_assign, cst.parse_expression(constant_mba)])
+            """
+        return original_node
 
 
 """
