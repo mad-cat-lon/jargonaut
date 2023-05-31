@@ -60,7 +60,8 @@ def generate_zero_identity_mba(t):
     """
     Generates a linear MBA expression of t variables that always evaluates to 0 
     for any x, y in Z
-    t MUST be >= 4
+
+    If t was less than 4 due to misconfiguration, defaults to 4
     """
     expr_to_truthtable = {
         "(x & y)":    [0, 0, 0, 1],
@@ -83,6 +84,8 @@ def generate_zero_identity_mba(t):
         tuple(truthtable): expr
         for expr, truthtable in expr_to_truthtable.items()
     }
+    if t < 4:
+        t = 4
     # Theorem 1 in https://theses.hal.science/tel-01623849/document    
     mba_identity = None
     while True:
@@ -159,12 +162,20 @@ def generate_invertible_affine(n):
     return (a, b), (a_inv, b_inv)
 
 
-def constant_to_mba(k, as_obj=True):
+def constant_to_mba(k, n_terms, as_obj=True):
     """
     Generates an affine function and zero-identity MBA and produces an 
     equivalent MBA expression node that always evaluates to the target constant k
+    
+    Args:
+        k: integer constant we want to obfuscate
+        n_terms: number of terms we want in the obfuscaed expression
+        as_obj: return as libCST object or as a string
+
+    Returns:
+        constant_mba_expr: generated expression that evaluates to k for any x,y
     """
-    zero_id_mba = generate_zero_identity_mba(5)
+    zero_id_mba = generate_zero_identity_mba(n_terms)
     # https://sci-hub.se/https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5
     # Page 4, Proposition 2
     # Proposition is for invertible polynomials but should work on affine functions too
