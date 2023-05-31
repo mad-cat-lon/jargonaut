@@ -32,6 +32,18 @@ def get_data(operator: cst.BaseBinaryOp, depth):
 
 
 def rewrite_expr(node: cst.BinaryOperation, depth=2):
+    """
+    Replaces a BinaryOperation node with a semantically equivalent expression.
+    Expressions are pre-generated up to a recursion depth of 30
+    Dataset obtained from https://github.com/RUB-SysSec/loki
+
+    Args:
+        node: a BinaryOperation node 
+        depth: integer specifying recursion depth
+
+    Returns:
+        mba_expr: a BinaryOperation node of the rewritten expression
+    """
     operator = node.operator
     expr_dataset = get_data(operator, depth)
     if expr_dataset is False:
@@ -50,6 +62,7 @@ def rewrite_expr(node: cst.BinaryOperation, depth=2):
     # print(f"mba-expr sub left: {mba_expr}")
     mba_expr = mba_expr.replace(y_name, right_as_code)
     # print(f"mba-expr sub right: {mba_expr}")
+    # TODO: Add as_obj argument to maintain consistency with constant_mba 
     mba_expr = cst.parse_expression(mba_expr)
     # print(f"final: {cst.parse_module('').code_for_node(mba_expr)}")
     # print("="*80)
