@@ -86,7 +86,7 @@ def generate_zero_identity_mba(t):
         "(x | y)":    [0, 1, 1, 1],
         "(~(x | y))": [1, 0, 0, 0],
         "(~(x ^ y))": [1, 0, 0, 1],
-        "(~y)":       [1, 0, 1, 1],
+        "(~y)":       [1, 0, 1, 0],
         "(x | ~y)":   [1, 0, 1, 1],
         "(~x)":       [1, 1, 0, 0],
         "(~x | y)":   [1, 1, 0, 1],
@@ -188,6 +188,7 @@ def constant_to_mba(k, n_terms, as_obj=True):
     Returns:
         constant_mba_expr: generated expression that evaluates to k for any x,y
     """
+    # NOTE: Calling this function is really expensive :( maybe this can be optimmized? 
     zero_id_mba = generate_zero_identity_mba(n_terms)
     # https://sci-hub.se/https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5
     # Page 4, Proposition 2
@@ -197,7 +198,7 @@ def constant_to_mba(k, n_terms, as_obj=True):
     # p(q(k)) == q(0 + p(k)) == q(zero_id_mba + p(k))
 
     # we need to account for variable bit lengths in python
-    n = random.randint(k.bit_length(), 100)
+    n = random.randint(k.bit_length()+1, 100)
     coeffs = generate_invertible_affine(n)
     # Let's build the expression now
     # Make args random strings to prevent clashes
