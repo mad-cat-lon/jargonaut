@@ -6,7 +6,7 @@ There aren't many Python obfuscators on GitHub that:
 - aren't just a combination of variable renaming, Base64 encoding and `marshal`/`eval` spam
 - aren't abandoned / deprecated 
 
-This is probably because more advanced obfuscation techniques (especially ones that touch control flow) are pretty difficult to implement for a dynamically typed language that was built around readibility and simplicity! I made `jargonaut` to fill this gap and also to learn more about Python internals, reverse engineering and malware analysis in general. I'm not an expert on any of this, so feel free to propose fixes/new features/improvements! 
+This is probably because more advanced obfuscation techniques (especially ones that touch control flow) are pretty difficult to implement for a dynamically typed language that was built around readibility and simplicity! I made `jargonaut` to fill this gap and also to learn more about Python internals, linear algebra, reverse engineering and malware analysis in general. I'm not an expert on any of this, so feel free to propose fixes/new features/improvements! 
 
 Note that this is a proof-of-concept and a work in progress. You should not be using this for anything serious - not only is `jargonaut` probably going to introduce bugs, but deobfuscation will likely be trivial until more features are implemented. 
 
@@ -75,8 +75,7 @@ You can configure which transformations are applied and their order of applicati
 
 ## Known/common issues 
 - `PatchReturns()` won't work if the obfuscated code is compiled with [Nuitka](https://github.com/Nuitka/Nuitka). This is because the transformation relies on patching function bytecode and Nuitka directly compiles Python to C++. 
-- `pyre init` is unable to locate typeshed. To resolve this, clone [typeshed](https://github.com/python/typeshed) and enter the path as 
-`path_to_typeshed/typeshed` and it should work
+- `pyre init` is unable to locate typeshed. To resolve this, clone [typeshed](https://github.com/python/typeshed) and enter the path as `path_to_typeshed/typeshed` and it should work
 
 ## Examples 
 View the examples folder if you would like to see this in action. 
