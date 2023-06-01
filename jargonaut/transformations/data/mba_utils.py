@@ -198,7 +198,7 @@ def constant_to_mba(k, n_terms, as_obj=True):
     # p(q(k)) == q(0 + p(k)) == q(zero_id_mba + p(k))
 
     # we need to account for variable bit lengths in python
-    n = random.randint(k.bit_length()+1, 100)
+    n = random.randint(k.bit_length() + 1, 100)
     coeffs = generate_invertible_affine(n)
     # Let's build the expression now
     # Make args random strings to prevent clashes
