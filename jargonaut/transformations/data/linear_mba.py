@@ -54,43 +54,55 @@ class ExprToLinearMBA(cst.CSTTransformer):
             print(self.progress_msg)
             self.first_visit = False
         if self.inference is True:
+            # TODO: Should use a matcher here instead of isinstance() spamming
             # We need to account for string literal concatenation 
-            # "abc" + "def" counts as a BinaryOperatiojn
+            # "abc" + "def" counts as a BinaryOperation 
             # https://lwn.net/Articles/551426/
             if (
                 isinstance(original_node.left, cst.SimpleString)
                 or isinstance(original_node.right, cst.SimpleString)
             ):
-                return original_node
+                return updated_node
+            left_inferred_type = ""
+            right_inferred_type = ""
+            # Handle KeyErrors from pyre
+            try:
+                left_inferred_type = self.get_metadata(
+                    TypeInferenceProvider,
+                    original_node.left
+                )
+            except KeyError:
+                pass
+            try:
+                right_inferred_type = self.get_metadata(
+                    TypeInferenceProvider,
+                    original_node.right
+                )
+            except KeyError:
+                pass
             # Account for the case where we have the following:
             # a = "abcd"
             # b = "efgh"
             # a + b
-            if original_node.left and original_node.right:
-                left_inferred_type = None
-                right_inferred_type = None
-                # Handle KeyErrors from pyre
-                try:
-                    left_inferred_type = self.get_metadata(
-                        TypeInferenceProvider,
-                        original_node.left
-                    )
-                except KeyError:
-                    pass
-                try:
-                    right_inferred_type = self.get_metadata(
-                        TypeInferenceProvider,
-                        original_node.right
-                    )
-                except KeyError:
-                    pass
-                if left_inferred_type and right_inferred_type:
-                    if (
-                        left_inferred_type != "int"
-                        or right_inferred_type != "int"
-                    ):
-                        return original_node
-                
+            if ("str" in left_inferred_type) or ("str" in right_inferred_type):
+                return original_node
+            # TODO: Account for the case where we have the following:
+            # a = "abcd"
+            # b = "efgh"
+            # a[0] + b[1]
+            # We also want to be able to transform the following:
+            # a = [1, 2, 3, 4]
+            # b = [4, 3, 5, 1]
+            # a[0] + b[1]
+            # Unfortunately, there doesn't seem to be a way to cleanly separate these
+            # cases due to how Python lists and pyre work AFAIK.
+            # I'd have to get the List() corresponding to the value of the subscript,
+            # the value of the Index() then check the type of the Element() in the list
+            if (
+                isinstance(original_node.left, cst.Subscript)
+                or isinstance(original_node.left, cst.Subscript)
+            ):
+                return updated_node
         parent_node = self.get_metadata(ParentNodeProvider, original_node)
         if isinstance(parent_node, cst.BinaryOperation):
             mba_expr = rewrite_expr(
