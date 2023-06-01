@@ -66,7 +66,7 @@ chmod +x setup.sh
 pyre
 cp source_file.py .
 python jargonaut.py -in_file source_file.py -out_file obfus_file.py --inference
-
+```
 ## Usage
 ```
 usage: jargonaut [-h] [-in_file IN_FILE] [-out_file OUT_FILE] [--inference]
