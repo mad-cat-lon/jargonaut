@@ -13,6 +13,15 @@ a = "Hello"
 b = "World"
 print(a + b)
 print("Goodbye" + "World")
+v = a[1] + b[2]
+print(v)
+
+p = 1337
+
+list1 = [1, 2, 3]
+list2 = [2, 3, 4]
+v = list1[0] + list2[1]
+print(v)
 
 # Lists and list comprehensions
 my_list = [1, 2, 3, 4, 5]
@@ -125,5 +134,3 @@ print(i)
 def x():
     string = "abcdefghijklmnop"
     return string
-import dis
-print(dis.dis(x))
