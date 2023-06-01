@@ -1,5 +1,5 @@
 # jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg)
-`jargonaut` is a Python to Python obfuscator built on Instagram's LibCST with a few cool features. Most of the techniques I have implemented or plan on implementing are ripped from these excellent [University of Arizona lecture slides](https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf). 
+`jargonaut` is a Python to Python obfuscator built on Meta's LibCST and the Pyre type checker with a few cool features. Most of the techniques I have implemented or plan on implementing are ripped from these excellent [University of Arizona lecture slides](https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf).
 
 There aren't many Python obfuscators on GitHub that:
 - actually produce functional code when some of Python's more complex features are used
@@ -11,16 +11,27 @@ This is probably because more advanced obfuscation techniques (especially ones t
 Note that this is a proof-of-concept and a work in progress. You should not be using this for anything serious - not only is `jargonaut` probably going to introduce bugs, but deobfuscation will likely be trivial until more features are implemented. 
 
 ## Features
-- Basic variable, function and parameter renaming (more coming soon)
-- Obfuscation of function return values with runtime bytecode patching (work in progress)
-- Obfuscation of builtin function calls with `getattr()`
-- Multiple string obfuscation methods with lambda expressions and others 
-- Obfuscation of arithmetic and bitwise expressions with [linear mixed boolean arithmetic expressions](https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5)
+- Basic variable, function, class and argument renaming 
+- Obfuscation of function return values with bytecode patching
+- String obfuscation with lambda expressions 
+- Basic obfuscation of calls to builtin functions with `getattr`, e.g `print` becomes `getattr(__builtins__, breakpoint.__name__[5]+StopAsyncIteration.__name__[12]+issubclass.__name__[0]+credits.__class__.__name__[4]+AssertionError.__name__[5])`
+- Obfuscation of arithmetic/bitwise expressions to [linear mixed boolean arithmetic expressions](https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5)
+  - `x ^ y` becomes `(~ (((~ x) ^ y) & (~ (y & (~ (y & (y | ((- y) + (y + y)))))))))`
+- Simple obfuscation of integer constants using invertible functions on MBA identities
+  - `1337` becomes `((56261358070232866564290277*((1*(x | y)+-1*(x)+-1*(~x | y)+1*(~(x ^ y)))+(291058294156397192947129182780))+(286349190324102644320556429))%2**89)` for any `x, y in Z` 
+  - This becomes truly insane when `IntConstToMBAExpr()` is applied after this transformation. Expect `jargonaut` to run for up to 1-4 minutes to fully obfuscate an average-length script if you decide to do this.
+  - Applying `IntConstToMBAExpr()` after `HideBuiltinCalls()` will yield something like the following for `print("Hello world!")`:
+  ```
+  getattr(__builtins__, KeyboardInterrupt.__name__[((16230303682531376496605*((-1*(136)+-1*(~(136 ^ 870))+-2*(~(136 & 870))+2*(-1)+1*(~870))+(196421983534706283597032))+(24344713766581692105671))%2**75)]+FloatingPointError.__name__[((249081203509*((-2*(487 | ~36)+1*(487)+1*(~(487 ^ 36))+1*(~36))+(910694651731))+(271499565791))%2**38)]+RecursionError.__name__[((7*((2*(~401)+-1*(~(380 | 401))+-2*(380 & ~401)+1*(380 ^ 401)+-1*(~(380 & 401)))+(3319))+(325))%2**10)]+ConnectionError.__name__[((99679084679*((2*(~(68 & 348))+-2*(~348)+-1*(~68 & 348)+1*(68)+-1*(68 | 348))+(364887613628))+(219013332190))%2**38)]+set.__name__[((23166991584907*((1*(~830 | 84)+-1*(~830 & 84)+-1*(-1)+1*(830 ^ 84))+(3122491713942114))+(898265945540812))%2**51)])("Hello world!")
+  ```
+  - `IntConstToMBAExpr()` can also inspect the current scope, use type inference to find integer variables and include them in the expression to further complicate static analysis
+- Comment removal 
 
 ## Planned improvements
 ### Upcoming features 
 - ~Comment removal~
 - Type hint removal
+- Polynomial MBA expressions and more advanced obfuscation rules (**coming soon**)
 - Renaming class methods and attributes with type inferencing
 - Opaque predicates/expressions, with and without interdependence
 - String obfuscation using Mealy machines
