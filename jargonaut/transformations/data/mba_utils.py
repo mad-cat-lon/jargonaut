@@ -218,12 +218,7 @@ def constant_to_mba(k, n_terms, as_obj=True):
         return constant_mba_expr
 
 
-"""
 if __name__ == "__main__":
-    base_expr = cst.parse_expression("x + y")
-    linear_mba = rewrite_expr(base_expr)
-    print("Rewrote expression: ")
-    zero_id = generate_zero_identity_mba(t=5)
-    constant_to_mba(133334845454)
+    print(constant_to_mba(1337, n_terms=4, as_obj=False))
 
-"""
+

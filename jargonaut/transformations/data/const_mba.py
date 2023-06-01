@@ -3,6 +3,8 @@ import random
 from libcst.metadata import ParentNodeProvider, TypeInferenceProvider, PositionProvider
 from libcst.metadata import ScopeProvider
 from .mba_utils import constant_to_mba
+from yaspin.spinners import Spinners
+from yaspin import kbi_safe_yaspin
 
 
 class ConstIntToLinearMBA(cst.CSTTransformer):
@@ -15,15 +17,11 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         inference:  Use type inference
     """
 
-    def __init__(
-        self,
-        n_terms_range=[4, 6],
-        inference=False
-    ):
+    def __init__(self, n_terms_range=[4, 6], inference=False):
         self.n_terms_range = n_terms_range
         self.inference = inference
         self.first_visit = True
-        self.progress_msg = "[-] Transforming all integer constants to linear MBA forms..."
+        self.progress_msg = "Transforming all integer constants to linear MBA forms..."
         if inference is False:
             ConstIntToLinearMBA.METADATA_DEPENDENCIES = (
                 ParentNodeProvider,
@@ -39,6 +37,7 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
             )
         self.curr_scope = (None, [])
         self.int_names_available = False
+        self.spinner = None
 
     def get_int_names_in_scope(self, node, scope):
         # HACK: We get the assignments in the scope that are of type() and appear before the
@@ -76,10 +75,11 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
                 pass
         return int_names 
 
-    def visit_Integer(
-        self,
-        node: cst.Integer
-    ):
+    def visit_Integer(self, node: cst.Integer):
+        if self.first_visit:
+            self.spinner = kbi_safe_yaspin(Spinners.dots12, text=self.progress_msg, timer=True)
+            self.spinner.start()
+            self.first_visit = False
         scope = self.get_metadata(ScopeProvider, node)
         if self.curr_scope[0] != scope:
             # print("Entering new scope")
@@ -98,13 +98,10 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         return True 
         
     def leave_Integer(
-            self,
-            original_node: cst.Integer,
-            updated_node: cst.Integer
+        self,
+        original_node: cst.Integer,
+        updated_node: cst.Integer
     ):
-        if self.first_visit:
-            print(self.progress_msg)
-            self.first_visit = False
         constant_mba = constant_to_mba(
             int(original_node.evaluated_value),
             n_terms=random.choice(self.n_terms_range),

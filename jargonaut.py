@@ -85,8 +85,8 @@ def main():
             data.HideBuiltinCalls(),
             # Transform integers to linear MBAs
             data.ConstIntToLinearMBA(
-                 n_terms_range=[4, 6],
-                 inference=do_inference
+                n_terms_range=[4, 6],
+                inference=do_inference
             ),
             # Replace string literals with lambda functions
             data.StringToLambdaExpr(),
@@ -108,7 +108,7 @@ def main():
             else:
                 wrapper = cst.MetadataWrapper(tree)
                 tree = wrapper.visit(t)
-                print()
+            t.spinner.ok()
         obfus = tree.code
         with open(args.out_file, "w", encoding="utf-8") as out_file:
             # Most specify encoding in output file due to binary string obfuscation
@@ -117,7 +117,7 @@ def main():
             out_file.write("import inspect\n")
             out_file.write("from ctypes import memmove\n")
             out_file.write(obfus)
-        print("[-] Done.")
+        print("[-] Done all transformations.")
         end_time = timer()
         if args.print_stats:
             print_stats(args.in_file, args.out_file, (end_time - start_time))

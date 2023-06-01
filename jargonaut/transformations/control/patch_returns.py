@@ -2,6 +2,8 @@ from libcst._nodes.statement import FunctionDef
 from libcst.metadata import ScopeProvider
 import libcst as cst
 import random
+from yaspin.spinners import Spinners
+from yaspin import kbi_safe_yaspin
 
 
 class PatchReturns(cst.CSTTransformer):
@@ -22,12 +24,17 @@ class PatchReturns(cst.CSTTransformer):
     def __init__(self, avoid=None):
         self.avoid = avoid
         self.first_visit = True
-        self.progress_msg = "[-] Patching function return values..."
+        self.progress_msg = "Patching function return values..."
+        self.spinner = None 
+
+    def visit_FunctionDef(self, node):
+        if self.first_visit is True:
+            self.spinner = kbi_safe_yaspin(Spinners.pipe, text=self.progress_msg, timer=True)
+            self.spinner.start()
+            self.first_visit = False
+        return True
 
     def leave_FunctionDef(self, original_node: FunctionDef, updated_node: FunctionDef) -> None:
-        if self.first_visit is True:
-            print(self.progress_msg)
-            self.first_visit = False
         # Go inside indented block (body=IndentedBlock)
         patched_body = list(original_node.body.body)
         ret_idx = []

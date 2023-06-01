@@ -1,5 +1,7 @@
 import libcst as cst
 import random 
+from yaspin.spinners import Spinners
+from yaspin import kbi_safe_yaspin
 
 
 class HideBuiltinCalls(cst.CSTTransformer):
@@ -14,7 +16,8 @@ class HideBuiltinCalls(cst.CSTTransformer):
 
     def __init__(self):
         self.first_visit = True 
-        self.progress_msg = "[-] Obfuscating calls to builtin functions..."
+        self.progress_msg = "Hiding calls to builtin functions..."
+        self.spinner = None
         self.builtin_names = [
             name for name, obj in 
             __builtins__.items()
@@ -76,14 +79,18 @@ class HideBuiltinCalls(cst.CSTTransformer):
             # Or even better, we can find names of the same type in the current scope and 
             # construct our builtin call from those
 
+    def visit_Call(self, node: cst.Call):
+        if self.first_visit is True:
+            self.spinner = kbi_safe_yaspin(Spinners.dots12, text=self.progress_msg, timer=True)
+            self.spinner.start()
+            self.first_visit = False
+        return True
+
     def leave_Call(
         self,
         original_node: cst.Call,
         updated_node: cst.Call
     ):
-        if self.first_visit is True:
-            print(self.progress_msg)
-            self.first_visit = False
         if isinstance(original_node.func, cst.Name):
             if original_node.func.value in self.builtin_names:
                 obfus_func_str = self.hide_call(original_node.func.value)

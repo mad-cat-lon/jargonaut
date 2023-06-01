@@ -1,5 +1,7 @@
 import libcst as cst 
 from math import ceil, log
+from yaspin.spinners import Spinners
+from yaspin import kbi_safe_yaspin
 
 
 class StringToLambdaExpr(cst.CSTTransformer):
@@ -10,7 +12,7 @@ class StringToLambdaExpr(cst.CSTTransformer):
     def __init__(self, avoid=None):
         self.avoid = avoid
         self.first_visit = True 
-        self.progress_msg = "[-] Obfuscating string literals with lambda expressions..."
+        self.progress_msg = "Obfuscating string literals with lambda expressions..."
 
     def encode(self, num, depth):
         if num == 0:
@@ -49,14 +51,18 @@ class StringToLambdaExpr(cst.CSTTransformer):
             if node.func.value == "open":
                 return False 
 
+    def visit_SimpleString(self, node: cst.SimpleString):
+        if self.first_visit is True:
+            self.spinner = kbi_safe_yaspin(Spinners.dots12, text=self.progress_msg, timer=True)
+            self.spinner.start()
+            self.first_visit = False  
+        return True
+    
     def leave_SimpleString(
         self,
         original_node: cst.SimpleString,
         updated_node: cst.SimpleString
     ):
-        if self.first_visit is True:
-            print(self.progress_msg)
-            self.first_visit = False 
         # Only convert strings of len > 3 and don't convert strings with prefixes
         if len(original_node.value) > 3 and not original_node.prefix:
             codes = [ord(c) for c in original_node.value]

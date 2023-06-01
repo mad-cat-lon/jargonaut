@@ -6,6 +6,8 @@ import random
 from libcst.metadata import ParentNodeProvider, TypeInferenceProvider, PositionProvider
 from libcst.metadata import ScopeProvider
 from .mba_utils import rewrite_expr
+from yaspin.spinners import Spinners
+from yaspin import kbi_safe_yaspin
 
 
 class ExprToLinearMBA(cst.CSTTransformer):
@@ -30,7 +32,8 @@ class ExprToLinearMBA(cst.CSTTransformer):
         self.sub_expr_depth = sub_expr_depth
         self.super_expr_depth = super_expr_depth
         self.first_visit = True
-        self.progress_msg = "[-] Transforming expressions to linear MBA forms..."
+        self.progress_msg = "Transforming expressions to linear MBA forms..."
+        self.spinner = None
         if inference is False:
             ExprToLinearMBA.METADATA_DEPENDENCIES = (
                 ParentNodeProvider,
@@ -45,14 +48,18 @@ class ExprToLinearMBA(cst.CSTTransformer):
                 ScopeProvider
             )
     
+    def visit_BinaryOperation(self, node: cst.BinaryOperation):
+        if self.first_visit is True:
+            self.spinner = kbi_safe_yaspin(Spinners.dots12, text=self.progress_msg, timer=True)
+            self.spinner.start()
+            self.first_visit = False
+        return True
+
     def leave_BinaryOperation(
         self,
         original_node: cst.BinaryOperation,
         updated_node: cst.BinaryOperation
-    ):        
-        if self.first_visit is True:
-            print(self.progress_msg)
-            self.first_visit = False
+    ):  
         if self.inference is True:
             # TODO: Should use a matcher here instead of isinstance() spamming
             # We need to account for string literal concatenation 
