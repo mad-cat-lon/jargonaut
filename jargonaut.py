@@ -1,6 +1,7 @@
 from jargonaut.transformations import data, layout, control
 import libcst as cst
 from libcst.metadata import FullRepoManager, TypeInferenceProvider
+from timeit import default_timer as timer
 import argparse 
 import platform
 import os
@@ -39,7 +40,7 @@ def handle_args():
     return args
 
 
-def print_stats(in_file, out_file):
+def print_stats(in_file, out_file, time):
     in_file_lc = 0
     out_file_lc = 0
     # Calculate line count changes
@@ -47,6 +48,7 @@ def print_stats(in_file, out_file):
         in_file_lc = len(f.readlines())
     with open(out_file, "r") as f:
         out_file_lc = len(f.readlines())
+    print(f"[*] Operation completed in {time} seconds")
     print(f"[*] {in_file_lc} lines -> {out_file_lc} lines")
     # Calculate file size changes 
     in_file_size = os.stat(in_file).st_size
@@ -64,22 +66,30 @@ def main():
         if system == "Windows":
             print("[!] Pyre is not currently supported on Windows.")
             exit()
+        # os.system("pyre")
+    start_time = timer()
     with open(args.in_file, "r", encoding="utf-8") as in_file:
         tree = cst.parse_module(in_file.read())
         transformations = [
             # Patch function return values
             control.PatchReturns(),
-            # Replace integer literals and binay operations with linear MBAs
-            # You can set the recursion depth up to 30 if desired
+            # Transform expressions to linear MBAs
+            # You can set the recursion depth up to 30, but the file 
+            # may be 10-50x larger and obfuscation may take up to an hour
             data.ExprToLinearMBA(
                 sub_expr_depth=[1, 3],
-                super_expr_depth=[3, 7],
+                super_expr_depth=[2, 4],
                 inference=do_inference
             ),
-            # Replace string literals with lambda functions
-            data.LambdaString(),
             # Obfuscate builtin calls
             data.HideBuiltinCalls(),
+            # Transform integers to linear MBAs
+            data.ConstIntToLinearMBA(
+                 n_terms_range=[4, 6],
+                 inference=do_inference
+            ),
+            # Replace string literals with lambda functions
+            data.StringToLambdaExpr(),
             # Randomize names
             layout.RandomizeNames(),
             # Remove comments
@@ -98,6 +108,7 @@ def main():
             else:
                 wrapper = cst.MetadataWrapper(tree)
                 tree = wrapper.visit(t)
+                print()
         obfus = tree.code
         with open(args.out_file, "w", encoding="utf-8") as out_file:
             # Most specify encoding in output file due to binary string obfuscation
@@ -107,8 +118,9 @@ def main():
             out_file.write("from ctypes import memmove\n")
             out_file.write(obfus)
         print("[-] Done.")
+        end_time = timer()
         if args.print_stats:
-            print_stats(args.in_file, args.out_file)
+            print_stats(args.in_file, args.out_file, (end_time - start_time))
 
 
 if __name__ == "__main__":
