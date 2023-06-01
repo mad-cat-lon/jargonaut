@@ -1,3 +1,4 @@
 z3-solver==4.10.2.0
 numpy==1.23.4
 libcst==0.4.9
+yaspin==2.3.0
