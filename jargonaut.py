@@ -5,6 +5,7 @@ from timeit import default_timer as timer
 import argparse 
 import platform
 import os
+import math
 
 
 def handle_args():
@@ -40,6 +41,27 @@ def handle_args():
     return args
 
 
+def shannon_entropy(file):
+    entropy = 0
+    with open(file, "rb") as f:
+        data = f.read()
+        possible = dict(((chr(x), 0) for x in range(0, 256)))
+        for byte in data:
+            possible[chr(byte)] += 1
+
+        data_len = len(data)
+        entropy = 0.0
+
+        # compute
+        for i in possible:
+            if possible[i] == 0:
+                continue
+
+            p = float(possible[i] / data_len)
+            entropy -= p * math.log(p, 2)
+    return entropy 
+
+
 def print_stats(in_file, out_file, time):
     in_file_lc = 0
     out_file_lc = 0
@@ -48,12 +70,18 @@ def print_stats(in_file, out_file, time):
         in_file_lc = len(f.readlines())
     with open(out_file, "r") as f:
         out_file_lc = len(f.readlines())
-    print(f"[*] Operation completed in {time} seconds")
-    print(f"[*] {in_file_lc} lines -> {out_file_lc} lines")
+    print(f"[*] Obfuscation completed in {time} seconds")
+    print(f"[*] Line count: {in_file_lc} -> {out_file_lc} lines")
     # Calculate file size changes 
     in_file_size = os.stat(in_file).st_size
     out_file_size = os.stat(out_file).st_size
-    print(f"[*] {in_file_size} bytes -> {out_file_size} bytes")
+    print(f"[*] File size: {in_file_size} -> {out_file_size} bytes")
+    in_file_entropy = shannon_entropy(in_file)
+    out_file_entropy = shannon_entropy(out_file)
+    print(
+        f"[*] Shannon entropy: {in_file_entropy} -> "
+        f"{out_file_entropy} bits"
+    )
 
 
 def main():
@@ -78,7 +106,7 @@ def main():
             # may be 10-50x larger and obfuscation may take up to an hour
             data.ExprToLinearMBA(
                 sub_expr_depth=[1, 3],
-                super_expr_depth=[2, 4],
+                super_expr_depth=[2, 5],
                 inference=do_inference
             ),
             # Obfuscate builtin calls
@@ -93,7 +121,9 @@ def main():
             # Randomize names
             layout.RandomizeNames(),
             # Remove comments
-            layout.RemoveComments()
+            layout.RemoveComments(),
+            # Insert static opaque MBA predicates
+            control.InsertStaticOpaqueMBAPredicates()
         ]
         for i, t in enumerate(transformations):
             if do_inference is True:

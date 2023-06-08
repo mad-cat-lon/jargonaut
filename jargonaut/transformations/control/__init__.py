@@ -1,1 +1,2 @@
 from jargonaut.transformations.control.patch_returns import PatchReturns
+from jargonaut.transformations.control.static_preds import InsertStaticOpaqueMBAPredicates
