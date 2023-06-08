@@ -7,6 +7,29 @@ import os
 script_dir = os.path.dirname(__file__) 
 
 
+expr_to_truthtable = {
+    "(x & y)":    [0, 0, 0, 1],
+    "(x & ~y)":   [0, 0, 1, 0],
+    "(x)":        [0, 0, 1, 1],
+    "(~x & y)":   [0, 1, 0, 0],
+    "(y)":        [0, 1, 0, 1],
+    "(x ^ y)":    [0, 1, 1, 0],
+    "(x | y)":    [0, 1, 1, 1],
+    "(~(x | y))": [1, 0, 0, 0],
+    "(~(x ^ y))": [1, 0, 0, 1],
+    "(~y)":       [1, 0, 1, 0],
+    "(x | ~y)":   [1, 0, 1, 1],
+    "(~x)":       [1, 1, 0, 0],
+    "(~x | y)":   [1, 1, 0, 1],
+    "(~(x & y))": [1, 1, 1, 0],
+    "(-1)":       [1, 1, 1, 1]
+}
+truthtable_to_expr = {
+    tuple(truthtable): expr
+    for expr, truthtable in expr_to_truthtable.items()
+}
+
+
 def get_data(operator: cst.BaseBinaryOp, depth):
     system = platform.system()
     if system == "Windows":
@@ -76,31 +99,9 @@ def generate_zero_identity_mba(t):
 
     If t was less than 4 due to misconfiguration, defaults to 4
     """
-    expr_to_truthtable = {
-        "(x & y)":    [0, 0, 0, 1],
-        "(x & ~y)":   [0, 0, 1, 0],
-        "(x)":        [0, 0, 1, 1],
-        "(~x & y)":   [0, 1, 0, 0],
-        "(y)":        [0, 1, 0, 1],
-        "(x ^ y)":    [0, 1, 1, 0],
-        "(x | y)":    [0, 1, 1, 1],
-        "(~(x | y))": [1, 0, 0, 0],
-        "(~(x ^ y))": [1, 0, 0, 1],
-        "(~y)":       [1, 0, 1, 0],
-        "(x | ~y)":   [1, 0, 1, 1],
-        "(~x)":       [1, 1, 0, 0],
-        "(~x | y)":   [1, 1, 0, 1],
-        "(~(x & y))": [1, 1, 1, 0],
-        "(-1)":       [1, 1, 1, 1]
-    }
-    truthtable_to_expr = {
-        tuple(truthtable): expr
-        for expr, truthtable in expr_to_truthtable.items()
-    }
     if t < 4:
         t = 4
     # Theorem 1 in https://theses.hal.science/tel-01623849/document    
-    mba_identity = None
     while True:
         col_vecs = random.sample(list(expr_to_truthtable.values()), k=t)
         F = np.column_stack(col_vecs)
@@ -135,23 +136,7 @@ def generate_zero_identity_mba(t):
                         f"{sol_as_vec[idx]}*{truthtable_to_expr[vec_as_tuple]}"
                     )
                 result = "+".join(result)
-                # Final check: expression must equal 0 for any x, y
-                # Let's just do this test a few times
-                test_num = 10
-                all_test_results = [False for _ in range(test_num)]
-                for i in range(test_num):
-                    x = random.randint(0, 100)
-                    y = random.randint(0, 100)
-                    test_result = result.replace("x", str(x))
-                    test_result = test_result.replace("y", str(y))
-                    if eval(result) == 0:
-                        all_test_results[i] = True
-                if all(all_test_results):
-                    # Good enough for me!
-                    mba_identity = result
-                    break
-    # print(f"Found 0-identity: {mba_identity}")
-    return mba_identity 
+                return result
 
 
 def generate_invertible_polynomial():
