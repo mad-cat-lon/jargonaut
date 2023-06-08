@@ -33,7 +33,7 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 - Type hint removal
 - Polynomial MBA expressions and more advanced obfuscation rules (**coming soon**)
 - Renaming class methods and attributes with type inferencing
-- Opaque predicates/expressions, with and without interdependence
+- Opaque predicates/expressions (**in progress**)
 - String obfuscation using Mealy machines
 - Packing 
 - Bogus control flow 
