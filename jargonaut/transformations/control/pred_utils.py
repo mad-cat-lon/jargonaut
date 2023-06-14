@@ -9,7 +9,6 @@ def generate_static_mba_eq_pred(as_obj=True, int_names=[]):
     """
     pred_int = random.randint(0, 10000)
     if int_names:
-        print("Using int_names")
         left_mba_expr = constant_to_mba(pred_int, n_terms=random.randint(4, 7), as_obj=False)
         left_x = random.choice(int_names)
         left_y = random.choice(int_names)
