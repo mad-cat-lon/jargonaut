@@ -1,4 +1,4 @@
-from jargonaut.transformations.data.linear_mba import ExprToLinearMBA
+from jargonaut.transformations.data.expr_mba import ExprToLinearMBA
 from jargonaut.transformations.data.const_mba import ConstIntToLinearMBA
 from jargonaut.transformations.data.binary_string import BinaryString
 from jargonaut.transformations.data.lambda_string import StringToLambdaExpr
