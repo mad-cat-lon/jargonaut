@@ -123,7 +123,7 @@ def main():
             # Remove comments
             layout.RemoveComments(),
             # Insert static opaque MBA predicates
-            control.InsertStaticOpaqueMBAPredicates()
+            control.InsertStaticOpaqueMBAPredicates(inference=do_inference)
         ]
         for i, t in enumerate(transformations):
             if do_inference is True:

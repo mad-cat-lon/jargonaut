@@ -35,7 +35,7 @@ class InsertStaticOpaqueMBAPredicates(cst.CSTTransformer):
     def visit_FunctionDef(self, node):
         if self.first_visit is True:
             self.spinner = kbi_safe_yaspin(Spinners.pipe, text=self.progress_msg, timer=True)
-            # self.spinner.start()
+            self.spinner.start()
             self.first_visit = False
         return True
 
