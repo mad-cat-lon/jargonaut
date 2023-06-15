@@ -185,5 +185,6 @@ def main():
             print_stats(args.in_file, args.out_file, (end_time - start_time))
         exit()
 
+
 if __name__ == "__main__":
     main()
