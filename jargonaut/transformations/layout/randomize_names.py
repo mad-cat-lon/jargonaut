@@ -68,7 +68,10 @@ class RandomizeNames(cst.CSTTransformer):
             qualified_names = list(scope.get_qualified_names_for(original_node))
             qualified_name = qualified_names[0]
             # Don't change names for class methods or attributes yet
-            if not isinstance(scope, ClassScope) and qualified_name.source == QualifiedNameSource.LOCAL:
+            if (
+                not isinstance(scope, ClassScope)
+                and qualified_name.source == QualifiedNameSource.LOCAL
+            ):
                 if qualified_name.name in self.randomize_map:
                     # print(f"{qualified_name}.name -> {self.randomize_map[qualified_name.name]}")
                     return updated_node.with_changes(
