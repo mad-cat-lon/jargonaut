@@ -13,7 +13,8 @@ class StringToLambdaExpr(cst.CSTTransformer):
         self.avoid = avoid
         self.first_visit = True 
         self.progress_msg = "Obfuscating string literals with lambda expressions..."
-
+        self.spinner = None 
+        
     def encode(self, num, depth):
         if num == 0:
             return "_ - _"
