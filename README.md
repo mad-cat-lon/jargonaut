@@ -1,4 +1,4 @@
-# jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg)
+# jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg) ![license](https://img.shields.io/github/license/mad-cat-lon/jargonaut) ![commits](https://img.shields.io/github/commit-activity/m/mad-cat-lon/jargonaut) ![stars](https://img.shields.io/github/stars/mad-cat-lon/jargonaut?style=social)
 `jargonaut` is a Python to Python obfuscator built on Meta's LibCST and the Pyre type checker with a few cool features. Most of the techniques I have implemented or plan on implementing are ripped from these excellent [University of Arizona lecture slides](https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf).
 
 There aren't many Python obfuscators on GitHub that:
