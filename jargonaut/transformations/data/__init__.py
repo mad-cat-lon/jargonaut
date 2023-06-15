@@ -1,5 +1,5 @@
 from jargonaut.transformations.data.expr_mba import ExprToLinearMBA
-from jargonaut.transformations.data.const_mba import ConstIntToLinearMBA
+from jargonaut.transformations.data.int_mba import ConstIntToLinearMBA
 from jargonaut.transformations.data.binary_string import BinaryString
 from jargonaut.transformations.data.lambda_string import StringToLambdaExpr
 from jargonaut.transformations.data.hide_builtin_calls import HideBuiltinCalls

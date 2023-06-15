@@ -1,4 +1,5 @@
 from jargonaut.transformations import data, layout, control
+from jargonaut import preprocessing
 import libcst as cst
 from libcst.metadata import FullRepoManager, TypeInferenceProvider
 from timeit import default_timer as timer
@@ -96,34 +97,13 @@ def main():
             exit()
         # os.system("pyre")
     start_time = timer()
+    # Preprocessing step (we need to write to a temp file in order to make pyre play nice)
     with open(args.in_file, "r", encoding="utf-8") as in_file:
         tree = cst.parse_module(in_file.read())
         transformations = [
-            # Patch function return values
-            control.PatchReturns(),
-            # Transform expressions to linear MBAs
-            # You can set the recursion depth up to 30, but the file 
-            # may be 10-50x larger and obfuscation may take up to an hour
-            data.ExprToLinearMBA(
-                sub_expr_depth=[1, 3],
-                super_expr_depth=[2, 5],
-                inference=do_inference
-            ),
-            # Obfuscate builtin calls
-            data.HideBuiltinCalls(),
-            # Transform integers to linear MBAs
-            data.ConstIntToLinearMBA(
-                n_terms_range=[4, 6],
-                inference=do_inference
-            ),
-            # Replace string literals with lambda functions
-            data.StringToLambdaExpr(),
-            # Randomize names
-            layout.RandomizeNames(),
-            # Remove comments
-            layout.RemoveComments(),
-            # Insert static opaque MBA predicates
-            control.InsertStaticOpaqueMBAPredicates(inference=do_inference)
+            # Seed function definitions and calls with bogus ints for 
+            # added obfuscation and more var choices for MBA expressions 
+            preprocessing.SeedParams()
         ]
         for i, t in enumerate(transformations):
             if do_inference is True:
@@ -133,6 +113,58 @@ def main():
                     {TypeInferenceProvider}
                 )
                 wrapper = cst.MetadataWrapper(tree, cache=manager.get_cache_for_path(args.in_file))
+                # wrapper = manager.get_metadata_wrapper_for_path(args.in_file)
+                tree = wrapper.visit(t)
+            else:
+                wrapper = cst.MetadataWrapper(tree)
+                tree = wrapper.visit(t)
+            t.spinner.ok()
+    temp_file = "jargonaut_tmp.py"
+    preprocessed = tree.code 
+    with open(temp_file, "w", encoding="utf-8") as out_file:
+        out_file.write("# -*- coding: utf-8 -*\n")
+        out_file.write(preprocessed)
+    print("[-] Finished preprocessing.")
+    # HACK: i will handle pyre server setup and configuration later
+    os.system("pyre >> /tmp/out")
+    with open(temp_file, "r", encoding="utf-8") as in_file:
+        tree = cst.parse_module(in_file.read())
+        transformations = [
+            # Patch function return values
+            control.PatchReturns(),
+            # Transform expressions to linear MBAs
+            data.ExprToLinearMBA(
+                sub_expr_depth=[1, 3],
+                super_expr_depth=[1, 5],
+                inference=do_inference
+            ),
+            # Obfuscate builtin calls
+            data.HideBuiltinCalls(),
+            # Transform integers to linear MBAs
+            data.ConstIntToLinearMBA(
+                n_terms_range=[4, 5],
+                inference=do_inference
+            ), 
+            # Replace string literals with lambda functions
+            data.StringToLambdaExpr(),
+            # Remove comments
+            layout.RemoveComments(),
+            # Insert static opaque MBA predicates
+            control.InsertStaticOpaqueMBAPredicates(inference=do_inference),
+            # Randomize names
+            layout.RandomizeNames(),
+            # Remove annotations
+            layout.RemoveAnnotations()
+    
+        ]
+        for i, t in enumerate(transformations):
+            if do_inference is True:
+                manager = FullRepoManager(
+                    os.path.dirname(temp_file),
+                    {temp_file},
+                    {TypeInferenceProvider}
+                )
+                wrapper = cst.MetadataWrapper(tree, cache=manager.get_cache_for_path(temp_file))
                 # wrapper = manager.get_metadata_wrapper_for_path(args.in_file)
                 tree = wrapper.visit(t)
             else:
@@ -151,7 +183,7 @@ def main():
         end_time = timer()
         if args.print_stats:
             print_stats(args.in_file, args.out_file, (end_time - start_time))
-
+        exit()
 
 if __name__ == "__main__":
     main()
