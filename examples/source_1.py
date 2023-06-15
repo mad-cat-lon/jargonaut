@@ -36,7 +36,7 @@ for i in range(10):
         print(f"{i} is odd")
 
 # Functions and recursion
-def factorial(n):
+def factorial(n: int):
     if n == 0:
         return 1
     else:
@@ -134,3 +134,4 @@ print(i)
 def x():
     string = "abcdefghijklmnop"
     return string
+x()
