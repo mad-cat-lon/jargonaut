@@ -4,9 +4,9 @@ import random
 import libcst as cst 
 import platform 
 import os
+# from sympy import symbols, Poly, ZZ
+
 script_dir = os.path.dirname(__file__) 
-
-
 expr_to_truthtable = {
     "(x & y)":    [0, 0, 0, 1],
     "(x & ~y)":   [0, 0, 1, 0],
@@ -137,15 +137,7 @@ def generate_zero_identity_mba(t):
                     )
                 result = "+".join(result)
                 return result
-
-
-def generate_invertible_polynomial():
-    """
-    Generates an invertible quadratic polynomial:
-    p(x) = ax^2 + bx + c where a != 0
-    """
-    pass 
-
+            
 
 def generate_invertible_affine(n):
     """
@@ -202,8 +194,5 @@ def constant_to_mba(k, n_terms, as_obj=True):
     else:
         return constant_mba_expr
 
-
-if __name__ == "__main__":
-    print(constant_to_mba(1337, n_terms=4, as_obj=False))
 
 
