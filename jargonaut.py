@@ -28,7 +28,7 @@ def handle_args():
         "--inference",
         default=False,
         dest="inference",
-        help="Use pyre for type inferencing for more stable code generation. Linux/WSL only.",
+        help="Use pyre for increased obfuscation. Linux/WSL only.",
         action="store_true"
     )
     parser.add_argument(
@@ -88,10 +88,10 @@ def print_stats(in_file, out_file, time):
 def main():
     args = handle_args()
     do_inference = args.inference
+    system = platform.system()
     if do_inference is False:
         print("[!] Type inferencing with pyre is not enabled. Obfuscated code may not be reliable.")
     else:
-        system = platform.system()
         if system == "Windows":
             print("[!] Pyre is not currently supported on Windows.")
             exit()
@@ -126,7 +126,8 @@ def main():
         out_file.write(preprocessed)
     print("[-] Finished preprocessing.")
     # HACK: i will handle pyre server setup and configuration later
-    os.system("pyre >> /tmp/out")
+    if system != "Windows":
+        os.system("pyre >> /tmp/out")
     with open(temp_file, "r", encoding="utf-8") as in_file:
         tree = cst.parse_module(in_file.read())
         transformations = [
