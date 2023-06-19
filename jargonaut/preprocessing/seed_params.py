@@ -3,7 +3,6 @@ import random
 from libcst.metadata import QualifiedNameProvider, QualifiedNameSource
 from libcst.metadata import ScopeProvider, ClassScope
 from libcst.metadata import ParentNodeProvider
-from libcst.metadata import TypeInferenceProvider
 from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
 
@@ -17,8 +16,7 @@ class SeedParams(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (
         ParentNodeProvider,
         QualifiedNameProvider, 
-        ScopeProvider,
-        TypeInferenceProvider
+        ScopeProvider
     )
 
     def __init__(self):
@@ -35,7 +33,7 @@ class SeedParams(cst.CSTTransformer):
                 text=self.progress_msg,
                 timer=True
             )
-            # self.spinner.start()
+            self.spinner.start()
             self.first_visit = False
         qualified_name = list(self.get_metadata(QualifiedNameProvider, node))
         scope = self.get_metadata(ScopeProvider, node)
