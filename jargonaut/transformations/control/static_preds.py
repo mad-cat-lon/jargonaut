@@ -41,20 +41,23 @@ class InsertStaticOpaqueMBAPredicates(cst.CSTTransformer):
 
     def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
         if original_node.name.value != "__init__":
-            int_names = []
-            if self.inference:
-                # Just look at function parameters for now, looking at scope is expensive
-                # NOTE: Won't always recognize correct type
-                params = original_node.params.params
-                for param in params:
+            int_params = []
+            # Just look at function parameters for now, looking at scope is expensive
+            # NOTE: Won't always recognize correct type
+            params = original_node.params.params
+            for param in params:
+                if self.inference and param.annotation is None:
                     inferred_type = ""
                     try:
                         inferred_type = self.get_metadata(TypeInferenceProvider, param.name)
                     except KeyError:
                         inferred_type = ""
                     if "int" in inferred_type:
-                        int_names.append(param.name)
-            mba_pred = generate_static_mba_eq_pred(int_names=int_names)
+                        int_params.append(param.name)
+                elif param.annotation:
+                    if param.annotation.annotation.value == "int":
+                        int_params.append(param.name)
+            mba_pred = generate_static_mba_eq_pred(int_names=int_params)
             func_body = original_node.body
             body = func_body.body
             if_block = cst.If(
