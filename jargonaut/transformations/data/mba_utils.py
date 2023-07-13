@@ -116,7 +116,7 @@ def generate_zero_identity_mba(t):
             solver.add(var != 0)
         # Matrix multiplication implemented as z3 constraints
         for i in range(m):
-            solver.add(z3.Sum([F[i][j] * V[j] for j in range(t)]) == b[i])
+            solver.add(z3.Sum([F[i][j] * V[j] for j in range(t)]) == int(b[i]))
         if solver.check() == z3.sat:
             sol = solver.model()
             sorted_sol = [
@@ -137,7 +137,7 @@ def generate_zero_identity_mba(t):
                     )
                 result = "+".join(result)
                 return result
-            
+
 
 def generate_invertible_affine(n):
     """
