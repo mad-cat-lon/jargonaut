@@ -32,12 +32,19 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 - ~Comment removal~
 - Type hint removal
 - Polynomial MBA expressions and more advanced obfuscation rules (**coming soon**)
-- Renaming class methods and attributes with type inferencing
+- Renaming class methods and attributes (**in progress**)
 - Opaque predicates/expressions (**in progress**)
 - String obfuscation using Mealy machines
 - Packing 
-- Bogus control flow 
-- Selective virtualization with custom instruction set for functions 
+- ~Bogus control flow~
+- VM obfuscation for selected functions (**in progress**)
+  - User configurable instruction set and configurable transpiler from Python code -> Python bytecode ->  instruction set for VM
+  - Dynamic generation of VM, transpiler and instruction set (really hard)
+  - Optional hardening techniques including:
+    - Handler randomization / duplication 
+    - No central dispatcher by inlining it into each handler(hard)
+    - Remove explicit handler table by encoding next handler addresses into instructions 
+    - Flow-sensitive instruction decryption to prevent patching and global analyses (really hard)
 - Dead code/parameter insertion 
 - Control flow flattening (chenxification)
 - C function conversion a la [pyarmor](https://github.com/dashingsoft/pyarmor)
