@@ -45,21 +45,20 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
     - No central dispatcher by inlining it into each handler(hard)
     - Remove explicit handler table by encoding next handler addresses into instructions 
     - Flow-sensitive instruction decryption to prevent patching and global analyses (really hard)
-- Dead code/parameter insertion 
-- Control flow flattening (chenxification)
-- C function conversion a la [pyarmor](https://github.com/dashingsoft/pyarmor)
+- ~Dead code/parameter insertion~
 - Variable splitting/merging
 - Function merging 
 ### Quality of life
 - Logging / debugging
+- Unit tests
 - Obfuscation of entire modules, not just single files 
 - Documentation 
-- Better performance:
+- Better performance (especially in `mba_utils.py`):
     - I'm not using LibCST to its full extent due to lack of knowledge/skill, and I know for a fact the way I perform transformations is suboptimal 
     - I know using Z3 for linear algebra is probably kind of weird and inefficient. I just couldn't figure out how to do it with `numpy` or `scipy` - if you can figure out a better way, please submit a PR! 
 
 ## Setup 
-`jargonaut` uses pyre for type inference. As of right now, pyre is only used during MBA expression generation to avoid transforming string concatenation with variables. If you don't use type inferencing, **there is a significant chance that the obfuscated code will contain errors.** Also note that pyre is not supported on Windows - for stability, you should be using OSX, Linux or WSL. Instructions for installing and setting up pyre can be found [here](https://pyre-check.org/docs/getting-started/).
+`jargonaut` uses pyre for type inference. As of right now, pyre is only used during MBA expression generation to avoid transforming string concatenation with variables. If you don't use pyre, **there is a significant chance that the obfuscated code will contain errors and some complex features will not be available.** Also note that pyre is not supported on Windows - for stability, you should be using OSX, Linux or WSL. Instructions for installing and setting up pyre can be found [here](https://pyre-check.org/docs/getting-started/).
 
 After installing pyre, place the file you would like to obfuscate in `jargonaut`'s repo directory and run `pyre init`. The pyre server will then be initialized and monitor the directory for changes during the obfuscation process. Support for files in outside directories and automatic installation, setup and configuaration of pyre will come later. You will need to ensure that the pyre server is started by running `pyre` before running `jargonaut.py`
 
@@ -87,7 +86,7 @@ optional arguments:
   --inference         use pyre's type inference. Linux/WSL only.
 ```
  
-`jargonaut` uses Instagram's [LibCST](https://github.com/Instagram/LibCST) for source code transformations. A transformation is a single operation on the source code's CST, like replacing string literals with obfuscated expressions, or removing comments.
+`jargonaut` uses [LibCST](https://github.com/Instagram/LibCST) for source code transformations. A transformation is a single operation on the source code's CST, like replacing string literals with obfuscated expressions, or removing comments.
 
 You can configure which transformations are applied and their order of application in `jargonaut.py`
 
