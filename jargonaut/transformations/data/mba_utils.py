@@ -101,42 +101,45 @@ def generate_zero_identity_mba(t):
     """
     if t < 4:
         t = 4
+
+    # Represent V as a list of variables that are constrained to ints
+    V = [z3.Int("v%d" % i) for i in range(t)]
+    solver = z3.Solver()
+
+    # Solution can't be zero vector 
+    for var in V:
+        solver.add(var != 0)
+
     # Theorem 1 in https://theses.hal.science/tel-01623849/document    
     while True:
-        col_vecs = random.sample(list(expr_to_truthtable.values()), k=t)
-        F = np.column_stack(col_vecs)
-        b = np.array([0, 0, 0, 0], dtype=np.int64)
-        m, n = F.shape
+        col_vecs = random.sample(list(expr_to_truthtable.values()), k=t)\
+        
         # We want to solve for FV=0
-        # Represent V as a list of variables that are constrained to ints
-        V = [z3.Int("v%d" % i) for i in range(t)]
-        solver = z3.Solver()
-        # Solution can't be zero vector and we want to avoid solutions like [0, 0, 0, 1]
-        for var in V:
-            solver.add(var != 0)
+        F = np.column_stack(col_vecs)
+
+        # Save current solver state
+        solver.push()
+        m, n = F.shape
+
         # Matrix multiplication implemented as z3 constraints
         for i in range(m):
-            solver.add(z3.Sum([F[i][j] * V[j] for j in range(t)]) == int(b[i]))
+            solver.add(z3.Sum([F[i][j] * V[j] for j in range(t)]) == 0)
+
         if solver.check() == z3.sat:
             sol = solver.model()
-            sorted_sol = [
-                int(sol[i].as_string())
-                for i in sorted(sol, key=lambda x: x.name())
-            ]
-            # Just in case my implementation was wrong, let's do a final check 
-            sol_as_vec = np.array(sorted_sol, dtype=np.int64).T
+            sol_as_vec = np.array([sol[v].as_long() for v in V], dtype=np.int64)
             check = np.matmul(F, sol_as_vec)
             # F times solution vector should be zero vector
             if not np.any(check):
-                result = []
-                # Recover expressions associated with each column to form final MBA
-                for idx, vec in enumerate(col_vecs): 
-                    vec_as_tuple = tuple(vec)
-                    result.append(
-                        f"{sol_as_vec[idx]}*{truthtable_to_expr[vec_as_tuple]}"
-                    )
-                result = "+".join(result)
-                return result
+                # Retrieve corresponding expressions from truth table
+                result = [
+                    f"{sol_as_vec[idx]}*{truthtable_to_expr[tuple(vec)]}"
+                    for idx, vec in enumerate(col_vecs)
+                ]
+                return "+".join(result)
+
+        # Restore solver state
+        solver.pop()
 
 
 def generate_invertible_affine(n):
