@@ -1,9 +1,11 @@
 from math import log
 import math
+import inspect
 # This program demonstrates various Python features and syntax
 
 # Basic variable assignment and string manipulation
 my_name = "Alice"
+q = 1337
 print(f"Hello, {my_name}!")
 print(log(2.0, 3.0))
 print(math.pow(2, 3))
@@ -17,6 +19,8 @@ v = a[1] + b[2]
 print(v)
 
 p = 1337
+i = 1000
+j = 7777
 
 list1 = [1, 2, 3]
 list2 = [2, 3, 4]
@@ -42,6 +46,7 @@ def factorial(n: int):
     else:
         return n * factorial(n-1)
 print(factorial(5))
+
 
 # Classes and inheritance
 class Animal:
@@ -87,6 +92,28 @@ my_person.add_pet(my_dog)
 my_person.add_pet(my_cat)
 my_person.show_pets()
 
+def square_list(n):
+    x = n**2
+    squared_list = []
+    my_dog = Dog("Fido", "brown", "Golden Retriever")
+    my_cat = Cat("Whiskers", "gray")
+    my_person = Person("Bob")
+    my_person.add_pet(my_dog)
+    my_person.add_pet(my_cat)
+    my_person.show_pets()
+    for i in range(x):
+        squared_list.append(i)
+    try:
+        x = 3 / 0
+    except ZeroDivisionError:
+        print("Error!")
+    if len(squared_list) % 2 == 0:
+        print("Yes!")
+        return True
+    else:
+        print("No!")
+        return False
+square_list(2)
 
 # Iterators
 my_iterator = iter(my_list)
