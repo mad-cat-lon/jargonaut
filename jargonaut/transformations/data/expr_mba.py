@@ -68,6 +68,8 @@ class ExprToLinearMBA(cst.CSTTransformer):
             if (
                 isinstance(original_node.left, cst.SimpleString)
                 or isinstance(original_node.right, cst.SimpleString)
+                or isinstance(original_node.left, cst.Subscript)
+                or isinstance(original_node.right, cst.Subscript)
             ):
                 return updated_node
             left_inferred_type = ""
@@ -92,7 +94,7 @@ class ExprToLinearMBA(cst.CSTTransformer):
             # b = "efgh"
             # a + b
             if ("str" in left_inferred_type) or ("str" in right_inferred_type):
-                return original_node
+                return updated_node
             # TODO: Account for the case where we have the following:
             # a = "abcd"
             # b = "efgh"
@@ -105,11 +107,6 @@ class ExprToLinearMBA(cst.CSTTransformer):
             # cases due to how Python lists and pyre work AFAIK.
             # I'd have to get the List() corresponding to the value of the subscript,
             # the value of the Index() then check the type of the Element() in the list
-            if (
-                isinstance(original_node.left, cst.Subscript)
-                or isinstance(original_node.left, cst.Subscript)
-            ):
-                return updated_node
         parent_node = self.get_metadata(ParentNodeProvider, original_node)
         if isinstance(parent_node, cst.BinaryOperation):
             mba_expr = rewrite_expr(
