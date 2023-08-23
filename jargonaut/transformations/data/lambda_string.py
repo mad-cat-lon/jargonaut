@@ -10,7 +10,7 @@ class StringToLambdaExpr(cst.CSTTransformer):
     Obfuscates string literals by converting them to an extremely
     opaque lambda expression
     """
-    #BUG: doesn't deal with escape characters properly
+    # BUG: doesn't deal with escape characters properly
     def __init__(self, avoid=None):
         self.avoid = avoid
         self.first_visit = True 
