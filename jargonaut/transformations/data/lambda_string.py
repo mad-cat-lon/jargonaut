@@ -2,6 +2,7 @@ import libcst as cst
 from math import ceil, log
 from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
+import re
 
 
 class StringToLambdaExpr(cst.CSTTransformer):
@@ -9,6 +10,7 @@ class StringToLambdaExpr(cst.CSTTransformer):
     Obfuscates string literals by converting them to an extremely
     opaque lambda expression
     """
+    #BUG: doesn't deal with escape characters properly
     def __init__(self, avoid=None):
         self.avoid = avoid
         self.first_visit = True 
@@ -65,7 +67,12 @@ class StringToLambdaExpr(cst.CSTTransformer):
         updated_node: cst.SimpleString
     ):
         # Only convert strings of len > 3 and don't convert strings with prefixes
-        if len(original_node.value) > 3 and not original_node.prefix:
+        # Also avoid escape characters
+        if (
+            len(original_node.value) > 3 
+            and not original_node.prefix 
+            and not re.findall(r'\\.', original_node.value)
+        ):
             codes = [ord(c) for c in original_node.value]
             num = sum(codes[i] * 256 ** i for i in range(len(codes)))
             obfus = self.convert(num)
