@@ -6,6 +6,7 @@ from libcst.metadata import FunctionScope, GlobalScope
 from .mba_utils import constant_to_mba
 from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
+from typing import Tuple, List
 
 
 class ConstIntToLinearMBA(cst.CSTTransformer):
@@ -60,6 +61,16 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         constant_mba = constant_mba.replace("y", str(y_val))
         return constant_mba
 
+    def replace_and_parse(self, mba_expr: str, x_val: str, y_val: str) -> cst.BaseExpression:
+        mba_expr = mba_expr.replace("x", x_val).replace("y", y_val)
+        return cst.parse_expression(mba_expr)
+
+    def get_replacements_from_scope(self, ints: List[int]) -> Tuple[str, str]:
+        """Helper to get replacements from given scope."""
+        x = random.choice(ints)
+        y = random.choice(ints)
+        return x.value, y.value
+
     def visit_Name(self, node: cst.Name):
         try:
             scope = self.get_metadata(ScopeProvider, node)
@@ -113,52 +124,19 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
             n_terms=random.choice(self.n_terms_range),
             as_obj=False
         )
-        # HACK: Should find a way to use matchers here 
-        if isinstance(scope, FunctionScope):
-            if self.inference:
-                if self.func_ints:
-                    # print(f"[FUNC] Available names: {self.func_ints[-1]}")
-                    x = random.choice(self.func_ints)
-                    y = random.choice(self.func_ints)
-                    constant_mba = constant_mba.replace("x", x.value)
-                    constant_mba = constant_mba.replace("y", y.value)
-                    return cst.parse_expression(constant_mba)
-                else:
-                    # print("[FUNC] No names available")
-                    # Try global scope
-                    valid_global_ints = self.get_global_ints_for_node(original_node)
-                    if len(valid_global_ints) > 0:
-                        # print("[FUNC] Trying global ints")
-                        x = random.choice(valid_global_ints)
-                        y = random.choice(valid_global_ints)
-                        constant_mba = constant_mba.replace("x", x.value)
-                        constant_mba = constant_mba.replace("y", y.value)
-                        return cst.parse_expression(constant_mba)
-                    else:
-                        # print("[FUNC] no usable global ints found")
-                        constant_mba = self.insert_random_vals(constant_mba)
-                        return cst.parse_expression(constant_mba)
-            else:
-                constant_mba = self.insert_random_vals(constant_mba)
-                return cst.parse_expression(constant_mba)
-        elif isinstance(scope, GlobalScope):
-            # print("In global scope")
-            if self.inference:
-                valid_global_ints = self.get_global_ints_for_node(original_node)
-                if len(valid_global_ints) > 0:
-                    # print(f"[GLOB] Available names: {self.glob_ints}")
-                    x = random.choice(valid_global_ints)
-                    y = random.choice(valid_global_ints)
-                    constant_mba = constant_mba.replace("x", x.value)
-                    constant_mba = constant_mba.replace("y", y.value)
-                    return cst.parse_expression(constant_mba)
-                else:
-                    # print("[GLOB] No names available")
-                    constant_mba = self.insert_random_vals(constant_mba)
-                    return cst.parse_expression(constant_mba)
-            else:
-                constant_mba = self.insert_random_vals(constant_mba)
-                return cst.parse_expression(constant_mba)
-        else:
-            constant_mba = self.insert_random_vals(constant_mba)
-            return cst.parse_expression(constant_mba)
+
+        if self.inference:
+            valid_ints = []
+            if isinstance(scope, FunctionScope) and self.func_ints:
+                valid_ints = self.func_ints
+            elif (
+                isinstance(scope, GlobalScope) 
+                or (isinstance(scope, FunctionScope) and not self.func_ints)
+            ):
+                valid_ints = self.get_global_ints_for_node(original_node)
+            if valid_ints:
+                x_val, y_val = self.get_replacements_from_scope(valid_ints)
+                return self.replace_and_parse(constant_mba, x_val, y_val)
+        # Either not in inference mode or no valid integers found in scope
+        constant_mba = self.insert_random_vals(constant_mba)
+        return cst.parse_expression(constant_mba)
