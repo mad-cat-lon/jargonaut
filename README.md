@@ -14,26 +14,33 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 - Basic variable, function, class and argument renaming 
 - Obfuscation of function return values with bytecode patching
 - String obfuscation with lambda expressions 
+- Dummy argument/variable insertion 
 - Basic obfuscation of calls to builtin functions with `getattr`, e.g `print` becomes `getattr(__builtins__, breakpoint.__name__[5]+StopAsyncIteration.__name__[12]+issubclass.__name__[0]+credits.__class__.__name__[4]+AssertionError.__name__[5])`
 - Obfuscation of arithmetic/bitwise expressions to [linear mixed boolean arithmetic expressions](https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5)
   - `x ^ y` becomes `(~ (((~ x) ^ y) & (~ (y & (~ (y & (y | ((- y) + (y + y)))))))))`
 - Simple obfuscation of integer constants using invertible functions on MBA identities
   - `1337` becomes `((56261358070232866564290277*((1*(x | y)+-1*(x)+-1*(~x | y)+1*(~(x ^ y)))+(291058294156397192947129182780))+(286349190324102644320556429))%2**89)` for any `x, y in Z` 
-  - This becomes truly insane when `IntConstToMBAExpr()` is applied after this transformation. Expect `jargonaut` to run for up to 1-4 minutes to fully obfuscate an average-length script if you decide to do this.
+  - Type inference in `IntConstToMBAExpr` allows us to inspect the current scope, find integer variables and insert them into obfuscated MBA expressions, preventing reverse engineers from simply extracting and evaluating it to obtain the true value. These variables can either be randomly inserted in the preprocessing step or come from the source itself. 
   - Applying `IntConstToMBAExpr()` after `HideBuiltinCalls()` will yield something like the following for `print("Hello world!")`:
   ```
   getattr(__builtins__, KeyboardInterrupt.__name__[((16230303682531376496605*((-1*(136)+-1*(~(136 ^ 870))+-2*(~(136 & 870))+2*(-1)+1*(~870))+(196421983534706283597032))+(24344713766581692105671))%2**75)]+FloatingPointError.__name__[((249081203509*((-2*(487 | ~36)+1*(487)+1*(~(487 ^ 36))+1*(~36))+(910694651731))+(271499565791))%2**38)]+RecursionError.__name__[((7*((2*(~401)+-1*(~(380 | 401))+-2*(380 & ~401)+1*(380 ^ 401)+-1*(~(380 & 401)))+(3319))+(325))%2**10)]+ConnectionError.__name__[((99679084679*((2*(~(68 & 348))+-2*(~348)+-1*(~68 & 348)+1*(68)+-1*(68 | 348))+(364887613628))+(219013332190))%2**38)]+set.__name__[((23166991584907*((1*(~830 | 84)+-1*(~830 & 84)+-1*(-1)+1*(830 ^ 84))+(3122491713942114))+(898265945540812))%2**51)])("Hello world!")
   ```
-  - `IntConstToMBAExpr()` can also inspect the current scope, use type inference to find integer variables and include them in the expression to further complicate static analysis
+- Super basic insertion of [static opaque predicates](https://arxiv.org/pdf/1909.01640.pdf) into function bodies, reusing MBA functionality from before 
 - Comment removal 
 
 ## Planned improvements
 ### Upcoming features 
 - ~Comment removal~
+- Array transformation (and transformation of other data to arrays)
 - Type hint removal
 - Polynomial MBA expressions and more advanced obfuscation rules (**coming soon**)
 - Renaming class methods and attributes (**in progress**)
 - Opaque predicates/expressions (**in progress**)
+  - ~Static opaque MBA predicates~
+  - [Dynamic opaque predicates](https://sci-hub.se/https://link.springer.com/chapter/10.1007/978-3-319-45871-7_20)
+  - [Opaque predicates with unsolved mathematical conjectures](https://link.springer.com/chapter/10.1007/978-3-642-23822-2_12)
+  - [Bi-opaque predicates](https://sci-hub.se/https://ieeexplore.ieee.org/abstract/document/8416525)
+
 - String obfuscation using Mealy machines
 - Packing 
 - ~Bogus control flow~
@@ -53,7 +60,7 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 - Unit tests
 - Obfuscation of entire modules, not just single files 
 - Documentation 
-- Better performance (especially in `mba_utils.py`):
+- Better performance:
     - I'm not using LibCST to its full extent due to lack of knowledge/skill, and I know for a fact the way I perform transformations is suboptimal 
     - I know using Z3 for linear algebra is probably kind of weird and inefficient. I just couldn't figure out how to do it with `numpy` or `scipy` - if you can figure out a better way, please submit a PR! 
 
