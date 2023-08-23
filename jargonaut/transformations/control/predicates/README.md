@@ -1,1 +1,0 @@
-Generator functions for opaque predicates of a wide variety of classes.
