@@ -9,7 +9,10 @@ class RemoveAnnotations(cst.CSTTransformer):
         self.progress_msg = "Removing all annotations..."
         self.spinner = None 
     
-    def visit_Annotation(self, node):
+    def visit_AnnAssign(
+        self,
+        node: cst.AnnAssign
+    ):
         if self.first_visit is True:
             self.spinner = kbi_safe_yaspin(
                 Spinners.simpleDotsScrolling,
@@ -18,7 +21,25 @@ class RemoveAnnotations(cst.CSTTransformer):
             )
             self.spinner.start()
             self.first_visit = False
-        return True 
+        # Don't visit the child Annotation() if we already have an AnnAssign(),
+        # since we are replacing it with Assign() 
+        return False
+    
+    def leave_AnnAssign(
+        self,
+        original_node: cst.AnnAssign,
+        updated_node: cst.AnnAssign
+    ) -> cst.Assign:
+        return cst.Assign(
+            targets=[
+                cst.AssignTarget(
+                    target=cst.Name(
+                        value=updated_node.target.value
+                    )
+                )
+            ],
+            value=updated_node.value
+        )
     
     def leave_Annotation(
         self,
