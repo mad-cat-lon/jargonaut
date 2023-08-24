@@ -21,7 +21,7 @@ class SeedParams(cst.CSTTransformer):
 
     def __init__(self):
         self.funcs = []
-        self.num_params = 2
+        self.num_params = 8
         self.first_visit = True
         self.progress_msg = "Seeding function definitions with bogus parameters..."
         self.spinner = None
@@ -61,9 +61,7 @@ class SeedParams(cst.CSTTransformer):
                     new_params.append(
                         cst.Param(
                             name=cst.Name(
-                                value=''.join(
-                                    random.choice("abcdefghijk") for _ in range(10)
-                                ),
+                                value=f"seed_int_param_{''.join(random.choices('abcdef', k=10))}",
                             ),
                             annotation=cst.Annotation(
                                 annotation=cst.Name(
@@ -96,7 +94,6 @@ class SeedParams(cst.CSTTransformer):
         # inferred_type = self.get_metadata(TypeInferenceProvider, original_node)
         # print(original_node)
         # print(f"[CALL] -> {inferred_type}")
-        # print(qualified_name)
         if len(qualified_name) != 0:
             qualified_name = qualified_name[0]
             if qualified_name.name in self.funcs:

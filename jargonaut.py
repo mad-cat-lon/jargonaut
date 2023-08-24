@@ -103,7 +103,8 @@ def main():
         transformations = [
             # Seed function definitions and calls with bogus ints for 
             # added obfuscation and more var choices for MBA expressions 
-            preprocessing.SeedParams()
+            preprocessing.SeedParams(),
+            preprocessing.SeedVars()
         ]
         for i, t in enumerate(transformations):
             if do_inference is True:
@@ -136,16 +137,20 @@ def main():
             # Transform expressions to linear MBAs
             data.ExprToLinearMBA(
                 sub_expr_depth=[1, 3],
-                super_expr_depth=[1, 5],
+                super_expr_depth=[4, 5],
                 inference=do_inference
             ),
             # Obfuscate builtin calls
             data.HideBuiltinCalls(),
             # Transform integers to linear MBAs
             data.ConstIntToLinearMBA(
-                n_terms_range=[4, 5],
+                n_terms_range=[4, 6],
                 inference=do_inference
-            ), 
+            ),
+            # data.VirtualizeFuncs(
+            #     targets=["square_list"],
+            #     inference=do_inference
+            # ),
             # Replace string literals with lambda functions
             data.StringToLambdaExpr(),
             # Remove comments
