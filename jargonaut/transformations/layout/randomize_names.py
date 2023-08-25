@@ -29,7 +29,21 @@ class RandomizeNames(cst.CSTTransformer):
         self.spinner = None
 
     def rand_name(self):
-        keys = ["I", "l", "i", "j", "J"]
+        keys = [
+            "I",
+            "l",
+            "i",
+            "Î",
+            "Ĳ",
+            "ĳ",
+            "ǉ",
+            "Ḭ",
+            "j",
+            "J",
+            "Ĵ",
+            "ⅉ",
+            "ｊ"
+        ]
         return ''.join(random.choices(keys, k=30))
     
     def visit_Name(self, node: cst.Name) -> Optional[bool]:
@@ -46,7 +60,7 @@ class RandomizeNames(cst.CSTTransformer):
         # We'll worry about dealing with modules later 
         # Only replace source=<QualifiedNameSource.Local: 3>
         if node.value not in self.avoid_names:
-            if len(qualified_names) != 0:
+            if len(qualified_names) == 1:
                 qualified_name = qualified_names[0]
                 if qualified_name.source == QualifiedNameSource.LOCAL:
                     if qualified_name.name not in self.randomize_map:
