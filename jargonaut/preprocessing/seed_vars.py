@@ -80,7 +80,9 @@ class SeedVars(cst.CSTTransformer):
         patched_body = list(updated_node.body.body)
         # Generate assignments and insert them randomly
         assigns = [
-            self.generate_random_assignment() for _ in range(random.randint(1, self.max_vars))
+            self.generate_random_assignment() for _ in range(
+                random.randint(1, self.max_vars)
+            )
         ]
         body_len = len(patched_body)
         # insert them! 
@@ -98,7 +100,9 @@ class SeedVars(cst.CSTTransformer):
         patched_body = list(updated_node.body)
         # Generate assignments and insert them randomly
         assigns = [
-            self.generate_random_assignment() for _ in range(random.randint(1, self.max_vars))
+            self.generate_random_assignment() for _ in range(
+                random.randint(1, self.max_vars)
+            )
         ]
         # insert them! 
         body_len = len(patched_body)
