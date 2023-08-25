@@ -120,6 +120,7 @@ def main():
                 wrapper = cst.MetadataWrapper(tree)
                 tree = wrapper.visit(t)
             t.spinner.ok()
+
     temp_file = "jargonaut_tmp.py"
     preprocessed = tree.code 
     with open(temp_file, "w", encoding="utf-8") as out_file:
@@ -142,9 +143,12 @@ def main():
             ),
             # Obfuscate builtin calls
             data.HideBuiltinCalls(),
+            # Randomize names to prevent clashes 
+            # when inserting integer variables 
+            layout.RandomizeNames(),
             # Transform integers to linear MBAs
             data.ConstIntToLinearMBA(
-                n_terms_range=[4, 6],
+                n_terms_range=[4, 5],
                 inference=do_inference
             ),
             # data.VirtualizeFuncs(

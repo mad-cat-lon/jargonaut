@@ -2,7 +2,7 @@ import libcst as cst
 import random 
 from libcst.metadata import ParentNodeProvider, TypeInferenceProvider, PositionProvider
 from libcst.metadata import ScopeProvider
-from libcst.metadata import FunctionScope, GlobalScope
+from libcst.metadata import GlobalScope
 from .mba_utils import constant_to_mba
 from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
@@ -42,12 +42,11 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         self.func_ints = []
         self.global_ints = []
     
-    def get_global_ints_for_node(self, node):
+    def get_global_ints_for_node_pos(self, node_pos):
         """
         Filters self.global_ints for int names that appear
         before current node in code 
         """
-        node_pos = (self.get_metadata(PositionProvider, node).start).line
         valid_global_ints = [
             name[0] for name in self.global_ints
             if name[1] < node_pos
@@ -95,7 +94,7 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         for param in node.params.params:
             if param.annotation:
                 if param.annotation.annotation.value == "int":
-                    int_params.append(param.name)
+                    int_params.append(param.name.value)
         self.func_ints = int_params
         return True 
     
@@ -118,7 +117,6 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         original_node: cst.Integer,
         updated_node: cst.Integer
     ):
-        scope = self.get_metadata(ScopeProvider, original_node)
         constant_mba = constant_to_mba(
             int(original_node.evaluated_value),
             n_terms=random.choice(self.n_terms_range),
@@ -126,6 +124,36 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         )
 
         if self.inference:
+            scope = self.get_metadata(ScopeProvider, original_node)
+            # print("="*50)
+            available = self.func_ints
+            # print(available)
+            try:
+                node_pos = self.get_metadata(PositionProvider, original_node)
+                available = available + [
+                    i.value for i in self.get_global_ints_for_node_pos(node_pos.start.line)
+                ]
+                for assign in scope.assignments:
+                    assign_node = assign.node
+                    try:
+                        inferred_type = self.get_metadata(TypeInferenceProvider, assign_node)
+                        assign_pos = self.get_metadata(PositionProvider, assign_node)
+                        if node_pos.start.line > assign_pos.start.line and inferred_type == "int":
+                            available.append(assign_node.value)
+                    except KeyError:
+                        pass
+            except KeyError:
+                pass
+            if available:
+                # print(available)
+                # print("="*50)
+                x_val = random.choice(available)
+                y_val = random.choice(available)
+                return self.replace_and_parse(constant_mba, x_val, y_val)
+            else:
+                constant_mba = self.insert_random_vals(constant_mba)
+                return cst.parse_expression(constant_mba)
+            """
             valid_ints = []
             if isinstance(scope, FunctionScope) and self.func_ints:
                 valid_ints = self.func_ints
@@ -137,6 +165,7 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
             if valid_ints:
                 x_val, y_val = self.get_replacements_from_scope(valid_ints)
                 return self.replace_and_parse(constant_mba, x_val, y_val)
+            """
         # Either not in inference mode or no valid integers found in scope
         constant_mba = self.insert_random_vals(constant_mba)
         return cst.parse_expression(constant_mba)
