@@ -143,9 +143,6 @@ def main():
             ),
             # Obfuscate builtin calls
             data.HideBuiltinCalls(),
-            # Randomize names to prevent clashes 
-            # when inserting integer variables 
-            layout.RandomizeNames(),
             # Transform integers to linear MBAs
             data.ConstIntToLinearMBA(
                 n_terms_range=[4, 5],
