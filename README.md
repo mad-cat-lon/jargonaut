@@ -100,6 +100,15 @@ You can configure which transformations are applied and their order of applicati
 ## Known/common issues 
 - `PatchReturns()` won't work if the obfuscated code is compiled with [Nuitka](https://github.com/Nuitka/Nuitka). This is because the transformation relies on patching function bytecode and Nuitka directly compiles Python to C++. 
 - `pyre init` is unable to locate typeshed. To resolve this, clone [typeshed](https://github.com/python/typeshed) and enter the path as `path_to_typeshed/typeshed` and it should work
+- File not found error from pyre: This usually happens when a new source file is added to the folder. Do `pyre stop` and `pyre` again to restart the server and let it detect your file.
+- Incorrect substitution of variables when `IntConstToMBA()` is applied with `HideBuiltInCalls()`. This happens when names are reused. To prevent this, make sure your variable names are unique across your script! `jargonaut` is not capable of dynamic analysis and it does not know the correct identifier to use in ambiguous cases like in the following:
+  ```
+  i = 123
+  for i in range(10):
+    print(i)
+  ```
+
+
 
 ## Examples 
 View the examples folder if you would like to see this in action. 
