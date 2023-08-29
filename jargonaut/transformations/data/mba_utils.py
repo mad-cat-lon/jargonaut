@@ -93,54 +93,32 @@ def rewrite_expr(node: cst.BinaryOperation, depth=2):
 
 
 def generate_zero_identity_mba(t):
-    """
-    Generates a linear MBA expression of t variables that always evaluates to 0 
-    for any x, y in Z
-
-    If t was less than 4 due to misconfiguration, defaults to 4
-    """
     if t < 4:
         t = 4
 
-    # Represent V as a list of variables that are constrained to ints
-    V = [z3.Int("v%d" % i) for i in range(t)]
-    solver = z3.Solver()
-
-    # Solution can't be zero vector 
-    for var in V:
-        solver.add(var != 0)
-
-    # Theorem 1 in https://theses.hal.science/tel-01623849/document    
     while True:
-        col_vecs = random.sample(list(expr_to_truthtable.values()), k=t)\
-        
-        # We want to solve for FV=0
+        # Generate random sample
+        col_vecs = random.sample(list(expr_to_truthtable.values()), k=t)
         F = np.column_stack(col_vecs)
 
-        # Save current solver state
-        solver.push()
-        m, n = F.shape
+        # Check if F has full rank, otherwise we might get a trivial solution
+        if np.linalg.matrix_rank(F) < F.shape[0]:
+            continue
+        
+        # Try to find a non-zero vector in the null space of F
+        _, _, vt = np.linalg.svd(F)
+        null_space = vt[-1, :]
+        
+        if np.allclose(null_space, np.zeros(null_space.shape)):
+            continue
 
-        # Matrix multiplication implemented as z3 constraints
-        for i in range(m):
-            solver.add(z3.Sum([F[i][j] * V[j] for j in range(t)]) == 0)
-
-        if solver.check() == z3.sat:
-            sol = solver.model()
-            sol_as_vec = np.array([sol[v].as_long() for v in V], dtype=np.int64)
-            check = np.matmul(F, sol_as_vec)
-            # F times solution vector should be zero vector
-            if not np.any(check):
-                # Retrieve corresponding expressions from truth table
-                result = [
-                    f"{sol_as_vec[idx]}*{truthtable_to_expr[tuple(vec)]}"
-                    for idx, vec in enumerate(col_vecs)
-                ]
-                return "+".join(result)
-
-        # Restore solver state
-        solver.pop()
-
+        # Non-zero vector found
+        if np.any(null_space):
+            result = [
+                f"{null_space[idx]:.4f}*{truthtable_to_expr[tuple(vec)]}"
+                for idx, vec in enumerate(col_vecs)
+            ]
+            return " + ".join(result)
 
 def generate_invertible_affine(n):
     """
