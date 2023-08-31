@@ -1,4 +1,4 @@
-import z3 
+from scipy.linalg import null_space
 import numpy as np
 import random
 import libcst as cst 
@@ -102,44 +102,32 @@ def generate_zero_identity_mba(t):
     if t < 4:
         t = 4
 
-    # Represent V as a list of variables that are constrained to ints
-    V = [z3.Int("v%d" % i) for i in range(t)]
-    solver = z3.Solver()
-
-    # Solution can't be zero vector 
-    for var in V:
-        solver.add(var != 0)
-
-    # Theorem 1 in https://theses.hal.science/tel-01623849/document    
     while True:
-        col_vecs = random.sample(list(expr_to_truthtable.values()), k=t)\
+        # Randomly sample t columns (truth tables)
+        col_vecs = random.sample(list(expr_to_truthtable.values()), k=t)
         
         # We want to solve for FV=0
         F = np.column_stack(col_vecs)
-
-        # Save current solver state
-        solver.push()
-        m, n = F.shape
-
-        # Matrix multiplication implemented as z3 constraints
-        for i in range(m):
-            solver.add(z3.Sum([F[i][j] * V[j] for j in range(t)]) == 0)
-
-        if solver.check() == z3.sat:
-            sol = solver.model()
-            sol_as_vec = np.array([sol[v].as_long() for v in V], dtype=np.int64)
-            check = np.matmul(F, sol_as_vec)
-            # F times solution vector should be zero vector
-            if not np.any(check):
-                # Retrieve corresponding expressions from truth table
-                result = [
-                    f"{sol_as_vec[idx]}*{truthtable_to_expr[tuple(vec)]}"
-                    for idx, vec in enumerate(col_vecs)
-                ]
-                return "+".join(result)
-
-        # Restore solver state
-        solver.pop()
+        
+        # Find the null space of F
+        null_space_vecs = null_space(F)
+        
+        # If a non-empty null space exists, the columns are linearly dependent
+        if null_space_vecs.size != 0:
+            for vec in null_space_vecs.T:
+                # Normalize to integer values if possible
+                min_val = np.min(np.abs(vec[np.abs(vec) > 1e-9]))
+                sol_as_vec = np.round(vec / min_val).astype(int)
+                
+                # Check that F times solution vector is a zero vector
+                check = np.matmul(F, sol_as_vec)
+                if np.all(np.isclose(check, 0)) and len(sol_as_vec) == t:
+                    # Retrieve corresponding expressions from truth table
+                    result = [
+                        f"{sol_as_vec[idx]}*{truthtable_to_expr[tuple(vec)]}"
+                        for idx, vec in enumerate(col_vecs)
+                    ]
+                    return "+".join(result)
 
 
 def generate_invertible_affine(n):
