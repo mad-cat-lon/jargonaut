@@ -62,7 +62,7 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 - Documentation 
 - Better performance:
     - I'm not using LibCST to its full extent due to lack of knowledge/skill, and I know for a fact the way I perform transformations is suboptimal 
-    - I know using Z3 for linear algebra is probably kind of weird and inefficient. I just couldn't figure out how to do it with `numpy` or `scipy` - if you can figure out a better way, please submit a PR! 
+    - ~I know using Z3 for linear algebra is probably kind of weird and inefficient. I just couldn't figure out how to do it with `numpy` or `scipy` - if you can figure out a better way, please submit a PR!~ resolved in this [pull request](https://github.com/mad-cat-lon/jargonaut/pull/18)
 
 ## Setup 
 `jargonaut` uses pyre for type inference. As of right now, pyre is only used during MBA expression generation to avoid transforming string concatenation with variables. If you don't use pyre, **there is a significant chance that the obfuscated code will contain errors and some complex features will not be available.** Also note that pyre is not supported on Windows - for stability, you should be using OSX, Linux or WSL. Instructions for installing and setting up pyre can be found [here](https://pyre-check.org/docs/getting-started/).
