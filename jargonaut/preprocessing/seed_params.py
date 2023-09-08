@@ -1,5 +1,6 @@
 import libcst as cst
-from libcst.metadata import ParentNodeProvider, QualifiedNameProvider, ScopeProvider, QualifiedNameSource, ClassScope
+from libcst.metadata import ParentNodeProvider, QualifiedNameProvider
+from libcst.metadata import ScopeProvider, QualifiedNameSource, ClassScope
 from yaspin import kbi_safe_yaspin
 from yaspin.spinners import Spinners
 import random
@@ -7,7 +8,7 @@ import random
 class SeedParams(cst.CSTTransformer):
     """
     SeedParams class extends the CSTTransformer from libcst to insert random integer variables
-    (with type hints for pyre) into function arguments. This also updates all calls to those functions
+    (with type hints for pyre) into function arguments. This also updates all calls to the funcs
     with the new random variables.
     """
 
@@ -44,7 +45,11 @@ class SeedParams(cst.CSTTransformer):
             bool: Always returns True to continue traversal.
         """
         if self.first_visit:
-            self.spinner = kbi_safe_yaspin(Spinners.dots12, text=self.progress_msg, timer=True)
+            self.spinner = kbi_safe_yaspin(
+                Spinners.dots12,
+                text=self.progress_msg,
+                timer=True
+            )
             self.spinner.start()
             self.first_visit = False
 
@@ -59,7 +64,11 @@ class SeedParams(cst.CSTTransformer):
 
         return True
 
-    def leave_FunctionDef(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef):
+    def leave_FunctionDef(
+        self, 
+        original_node: cst.FunctionDef,
+        updated_node: cst.FunctionDef
+    ):
         """
         Modify the function definition to include new random integer parameters.
         
@@ -77,17 +86,21 @@ class SeedParams(cst.CSTTransformer):
             if qualified_name in self.funcs:
                 new_params = original_node.params.params + tuple(
                     cst.Param(
-                        name=cst.Name(value=f"seed_int_param_{''.join(random.choices('abcdef', k=10))}"),
+                        name=cst.Name(
+                            value=f"seed_int_param_{''.join(random.choices('abcdef', k=10))}"
+                        ),
                         annotation=cst.Annotation(annotation=cst.Name(value="int"))
                     ) for _ in range(self.num_params)
                 )
-                return updated_node.with_changes(params=original_node.params.with_changes(params=new_params))
+                return updated_node.with_changes(
+                    params=original_node.params.with_changes(params=new_params)
+                )
 
         return original_node
 
     def leave_Call(self, original_node: cst.Call, updated_node: cst.Call):
         """
-        Modify the function calls to include new random integer arguments for the modified functions.
+        Modify the function calls to include new random int arguments for the modified functions.
         
         Args:
             original_node (cst.Call): Original function call node.
@@ -102,7 +115,11 @@ class SeedParams(cst.CSTTransformer):
             qualified_name = next(iter(qualified_names)).name
             if qualified_name in self.funcs:
                 new_args = original_node.args + tuple(
-                    cst.Arg(value=cst.Integer(value=str(random.randint(0, 100)))) for _ in range(self.num_params)
+                    cst.Arg(
+                        value=cst.Integer(
+                            value=str(random.randint(0, 100))
+                        )
+                    ) for _ in range(self.num_params)
                 )
                 return updated_node.with_changes(args=new_args)
 
