@@ -1,9 +1,10 @@
 import libcst as cst
 from libcst.metadata import ParentNodeProvider, QualifiedNameProvider
-from libcst.metadata import ScopeProvider, QualifiedNameSource, ClassScope
+from libcst.metadata import ScopeProvider, ClassScope
 from yaspin import kbi_safe_yaspin
 from yaspin.spinners import Spinners
 import random
+
 
 class SeedParams(cst.CSTTransformer):
     """
@@ -20,16 +21,12 @@ class SeedParams(cst.CSTTransformer):
         """
         # Set of function names
         self.funcs = set()
-
         # Number of random parameters to add
         self.num_params = 8
-
         # Flag to indicate first visit
         self.first_visit = True
-
         # Progress message for spinner
         self.progress_msg = "Seeding function definitions with bogus parameters..."
-
         # Spinner for indicating progress
         self.spinner = None
 
