@@ -1,196 +1,128 @@
-from jargonaut.transformations import data, layout, control
-from jargonaut import preprocessing
+import os
+import platform
+import argparse
+import math
+from timeit import default_timer as timer
+
 import libcst as cst
 from libcst.metadata import FullRepoManager, TypeInferenceProvider
-from timeit import default_timer as timer
-import argparse 
-import platform
-import os
-import math
+
+from jargonaut.transformations import data, layout, control
+from jargonaut import preprocessing
 
 
-def handle_args():
-    prog = "jargonaut"
-    description = "jargonaut - reliable and configurable Python to Python obfuscation"
-    parser = argparse.ArgumentParser(
-        prog=prog,
-        description=description
-    )
-    parser.add_argument(
-        "-in_file",
-        help="Path to target file",
-    )
-    parser.add_argument(
-        "-out_file",
-        help="Path to obfuscated file",
-    )
-    parser.add_argument(
-        "--inference",
-        default=False,
-        dest="inference",
-        help="Use pyre for increased obfuscation. Linux/WSL only.",
-        action="store_true"
-    )
-    parser.add_argument(
-        "--print-stats",
-        default=True,
-        dest="print_stats",
-        help="Print statistics after obfuscation",
-        action="store_true"
-    )
-    args = parser.parse_args()
+def prompt_for_args():
+    args = argparse.Namespace()
+    args.in_file = input("Path to target file: ")
+    args.out_file = input("Path to obfuscated file: ")
+    args.inference = input("Use pyre for increased obfuscation (Linux/WSL only)? (y/n): ").lower() == 'y'
+    args.print_stats = input("Print statistics after obfuscation? (y/n): ").lower() == 'y'
     return args
 
 
-def shannon_entropy(file):
-    entropy = 0
-    with open(file, "rb") as f:
+def handle_args():
+    parser = argparse.ArgumentParser(prog="jargonaut", description="jargonaut - reliable and configurable Python to Python obfuscation")
+    parser.add_argument("-in_file", help="Path to target file")
+    parser.add_argument("-out_file", help="Path to obfuscated file")
+    parser.add_argument("--inference", default=False, dest="inference", action="store_true",
+                        help="Use pyre for increased obfuscation. Linux/WSL only.")
+    parser.add_argument("--print-stats", default=True, dest="print_stats", action="store_true",
+                        help="Print statistics after obfuscation")
+    args = parser.parse_args()
+    if not any(vars(args).values()):
+        return prompt_for_args()
+    return args
+
+
+def shannon_entropy(file_path):
+    with open(file_path, "rb") as f:
         data = f.read()
-        possible = dict(((chr(x), 0) for x in range(0, 256)))
-        for byte in data:
-            possible[chr(byte)] += 1
-
-        data_len = len(data)
-        entropy = 0.0
-
-        # compute
-        for i in possible:
-            if possible[i] == 0:
-                continue
-
-            p = float(possible[i] / data_len)
-            entropy -= p * math.log(p, 2)
-    return entropy 
+    possible = {chr(x): 0 for x in range(256)}
+    for byte in data:
+        possible[chr(byte)] += 1
+    data_len = len(data)
+    return -sum((p / data_len) * math.log(p / data_len, 2) for p in possible.values() if p != 0)
 
 
-def print_stats(in_file, out_file, time):
-    in_file_lc = 0
-    out_file_lc = 0
-    # Calculate line count changes
-    with open(in_file, "r") as f:
-        in_file_lc = len(f.readlines())
-    with open(out_file, "r") as f:
-        out_file_lc = len(f.readlines())
-    print(f"[*] Obfuscation completed in {time} seconds")
-    print(f"[*] Line count: {in_file_lc} -> {out_file_lc} lines")
-    # Calculate file size changes 
+def print_stats(in_file, out_file, elapsed_time):
+    in_file_lc = sum(1 for _ in open(in_file, "r"))
+    out_file_lc = sum(1 for _ in open(out_file, "r"))
     in_file_size = os.stat(in_file).st_size
     out_file_size = os.stat(out_file).st_size
-    print(f"[*] File size: {in_file_size} -> {out_file_size} bytes")
     in_file_entropy = shannon_entropy(in_file)
     out_file_entropy = shannon_entropy(out_file)
-    print(
-        f"[*] Shannon entropy: {in_file_entropy} -> "
-        f"{out_file_entropy} bits"
-    )
+
+    print(f"[*] Obfuscation completed in {elapsed_time} seconds")
+    print(f"[*] Line count: {in_file_lc} -> {out_file_lc} lines")
+    print(f"[*] File size: {in_file_size} -> {out_file_size} bytes")
+    print(f"[*] Shannon entropy: {in_file_entropy} -> {out_file_entropy} bits")
+
+
+def apply_transformations(tree, transformations, metadata_wrapper_args=None):
+    for t in transformations:
+        if metadata_wrapper_args:
+            manager = FullRepoManager(*metadata_wrapper_args)
+            wrapper = cst.MetadataWrapper(tree, cache=manager.get_cache_for_path(metadata_wrapper_args[1]))
+        else:
+            wrapper = cst.MetadataWrapper(tree)
+        tree = wrapper.visit(t)
+        t.spinner.ok()
+    return tree
 
 
 def main():
     args = handle_args()
-    do_inference = args.inference
     system = platform.system()
-    if do_inference is False:
-        print("[!] Type inferencing with pyre is not enabled. Obfuscated code may not be reliable.")
-    else:
-        if system == "Windows":
-            print("[!] Pyre is not currently supported on Windows.")
-            exit()
-        # os.system("pyre")
-    start_time = timer()
-    # Preprocessing step (we need to write to a temp file in order to make pyre play nice)
-    with open(args.in_file, "r", encoding="utf-8") as in_file:
-        tree = cst.parse_module(in_file.read())
-        transformations = [
-            # Seed function definitions and calls with bogus ints for 
-            # added obfuscation and more var choices for MBA expressions 
-            preprocessing.SeedParams(),
-            preprocessing.SeedVars()
-        ]
-        for i, t in enumerate(transformations):
-            if do_inference is True:
-                manager = FullRepoManager(
-                    os.path.dirname(args.in_file),
-                    {args.in_file},
-                    {TypeInferenceProvider}
-                )
-                wrapper = cst.MetadataWrapper(tree, cache=manager.get_cache_for_path(args.in_file))
-                # wrapper = manager.get_metadata_wrapper_for_path(args.in_file)
-                tree = wrapper.visit(t)
-            else:
-                wrapper = cst.MetadataWrapper(tree)
-                tree = wrapper.visit(t)
-            t.spinner.ok()
 
-    temp_file = "jargonaut_tmp.py"
-    preprocessed = tree.code 
-    with open(temp_file, "w", encoding="utf-8") as out_file:
-        out_file.write("# -*- coding: utf-8 -*\n")
-        out_file.write(preprocessed)
-    print("[-] Finished preprocessing.")
-    # HACK: i will handle pyre server setup and configuration later
+    if args.inference and system == "Windows":
+        print("[!] Pyre is not currently supported on Windows.")
+        exit()
+
+    start_time = timer()
+
+    with open(args.in_file, "r", encoding="utf-8") as f:
+        tree = cst.parse_module(f.read())
+
+    preprocessing_transformations = [preprocessing.SeedParams(), preprocessing.SeedVars()]
+
+    metadata_wrapper_args = (os.path.dirname(args.in_file), {args.in_file}, {TypeInferenceProvider}) if args.inference else None
+    tree = apply_transformations(tree, preprocessing_transformations, metadata_wrapper_args)
+
+    with open("jargonaut_tmp.py", "w", encoding="utf-8") as f:
+        f.write("# -*- coding: utf-8 -*\n")
+        f.write(tree.code)
+
     if system != "Windows":
         os.system("pyre >> /tmp/out")
-    with open(temp_file, "r", encoding="utf-8") as in_file:
-        tree = cst.parse_module(in_file.read())
-        transformations = [
-            # Patch function return values
-            control.PatchReturns(),
-            # Transform expressions to linear MBAs
-            data.ExprToLinearMBA(
-                sub_expr_depth=[1, 3],
-                super_expr_depth=[4, 5],
-                inference=do_inference
-            ),
-            # Obfuscate builtin calls
-            data.HideBuiltinCalls(),
-            # Transform integers to linear MBAs
-            data.ConstIntToLinearMBA(
-                n_terms_range=[4, 5],
-                inference=do_inference
-            ),
-            # data.VirtualizeFuncs(
-            #     targets=["square_list"],
-            #     inference=do_inference
-            # ),
-            # Replace string literals with lambda functions
-            data.StringToLambdaExpr(),
-            # Remove comments
-            layout.RemoveComments(),
-            # Insert static opaque MBA predicates
-            control.InsertStaticOpaqueMBAPredicates(inference=do_inference),
-            # Randomize names
-            layout.RandomizeNames(),
-            # Remove annotations
-            layout.RemoveAnnotations()
-    
-        ]
-        for i, t in enumerate(transformations):
-            if do_inference is True:
-                manager = FullRepoManager(
-                    os.path.dirname(temp_file),
-                    {temp_file},
-                    {TypeInferenceProvider}
-                )
-                wrapper = cst.MetadataWrapper(tree, cache=manager.get_cache_for_path(temp_file))
-                # wrapper = manager.get_metadata_wrapper_for_path(args.in_file)
-                tree = wrapper.visit(t)
-            else:
-                wrapper = cst.MetadataWrapper(tree)
-                tree = wrapper.visit(t)
-            t.spinner.ok()
-        obfus = tree.code
-        with open(args.out_file, "w", encoding="utf-8") as out_file:
-            # Most specify encoding in output file due to binary string obfuscation
-            out_file.write("# -*- coding: utf-8 -*\n")
-            # For PatchReturn(): this is temporary
-            out_file.write("import inspect\n")
-            out_file.write("from ctypes import memmove\n")
-            out_file.write(obfus)
-        print("[-] Done all transformations.")
-        end_time = timer()
-        if args.print_stats:
-            print_stats(args.in_file, args.out_file, (end_time - start_time))
-        exit()
+
+    with open("jargonaut_tmp.py", "r", encoding="utf-8") as f:
+        tree = cst.parse_module(f.read())
+
+    main_transformations = [
+        control.PatchReturns(),
+        data.ExprToLinearMBA(sub_expr_depth=[1, 3], super_expr_depth=[4, 5], inference=args.inference),
+        data.HideBuiltinCalls(),
+        data.ConstIntToLinearMBA(n_terms_range=[4, 5], inference=args.inference),
+        data.StringToLambdaExpr(),
+        layout.RemoveComments(),
+        control.InsertStaticOpaqueMBAPredicates(inference=args.inference),
+        layout.RandomizeNames(),
+        layout.RemoveAnnotations()
+    ]
+
+    metadata_wrapper_args = (os.path.dirname("jargonaut_tmp.py"), {"jargonaut_tmp.py"}, {TypeInferenceProvider}) if args.inference else None
+    tree = apply_transformations(tree, main_transformations, metadata_wrapper_args)
+
+    with open(args.out_file, "w", encoding="utf-8") as f:
+        f.write("# -*- coding: utf-8 -*\n")
+        f.write("import inspect\n")
+        f.write("from ctypes import memmove\n")
+        f.write(tree.code)
+
+    end_time = timer()
+
+    if args.print_stats:
+        print_stats(args.in_file, args.out_file, end_time - start_time)
 
 
 if __name__ == "__main__":
