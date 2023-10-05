@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*
-# -*- coding: utf-8 -*
-# -*- coding: utf-8 -*
+
 from math import log
 import math
 import inspect
+import dis
 # This program demonstrates various Python features and syntax
 
 # Basic variable assignment and string manipulation
@@ -36,11 +36,11 @@ squared_list = [x**2 for x in my_list]
 print(squared_list)
 
 # Conditional statements and loops
-for i in range(10):
-    if i % 2 == 0:
-        print(f"{i} is even")
+for l in range(10):
+    if l % 2 == 0:
+        print(f"{l} is even")
     else:
-        print(f"{i} is odd")
+        print(f"{l} is odd")
 
 # Functions and recursion
 def factorial(n: int):
@@ -104,12 +104,9 @@ def square_list(n):
     my_person.add_pet(my_dog)
     my_person.add_pet(my_cat)
     my_person.show_pets()
-    for i in range(x):
+    for m in range(x):
         squared_list.append(i)
-    try:
-        x = 3 / 0
-    except ZeroDivisionError:
-        print("Error!")
+    print("Error!")
     if len(squared_list) % 2 == 0:
         print("Yes!")
         return True
@@ -128,12 +125,12 @@ print(add(2, 3))
 
 # Generators and iterables
 def squares(n):
-    for i in range(n):
-        yield i**2
+    for g in range(n):
+        yield g**2
 
 my_generator = squares(5)
-for i in my_generator:
-    print(i)
+for f in my_generator:
+    print(f)
 
 # Exceptions
 try:
@@ -149,9 +146,9 @@ with open("test.txt", "w") as f:
 def apply(func, x):
     return func(x)
 
-def test(i, x):
-    i += x
-    return i
+def test(h, x):
+    h += x
+    return h
 
 print(apply(lambda x: x**2, 3))
 x = 135743895743875
