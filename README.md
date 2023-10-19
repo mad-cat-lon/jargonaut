@@ -1,5 +1,5 @@
 # jargonaut ![pep-8](https://github.com/xor-eax-eax-ret/jargonaut/actions/workflows/pep8.yml/badge.svg) ![license](https://img.shields.io/github/license/mad-cat-lon/jargonaut) ![commits](https://img.shields.io/github/commit-activity/m/mad-cat-lon/jargonaut) ![stars](https://img.shields.io/github/stars/mad-cat-lon/jargonaut?style=social)
-`jargonaut` is a Python to Python obfuscator built on Meta's LibCST and the Pyre type checker with a few cool features. Most of the techniques I have implemented or plan on implementing are ripped from these excellent [University of Arizona lecture slides](https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf). Note that because Pyre is not supported on Windows, `jargonaut` **is Linux/OSX/WSL only.** `jargonaut` is also only currently capable of **obfuscating individual files. Module-level obfuscation is currently in development.**
+`jargonaut` is a Python to Python obfuscator built on Meta's LibCST and the Pyre type checker with a few cool features. Most of the techniques I have implemented or plan on implementing are ripped from these excellent [University of Arizona lecture slides](https://www2.cs.arizona.edu/~collberg/Teaching/553/2011/Resources/obfuscation.pdf). Since Pyre is not supported on Windows, `jargonaut` **is Linux/OSX/WSL only.** `jargonaut` is also only currently capable of **obfuscating individual files. Module-level obfuscation is currently in development.**
 
 There aren't many Python obfuscators on GitHub that:
 - actually produce functional code when some of Python's more complex features are used
@@ -40,11 +40,10 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
   - [Dynamic opaque predicates](https://sci-hub.se/https://link.springer.com/chapter/10.1007/978-3-319-45871-7_20)
   - [Opaque predicates with unsolved mathematical conjectures](https://link.springer.com/chapter/10.1007/978-3-642-23822-2_12)
   - [Bi-opaque predicates](https://sci-hub.se/https://ieeexplore.ieee.org/abstract/document/8416525)
-
 - String obfuscation using Mealy machines
 - Packing 
 - ~Bogus control flow~
-- VM obfuscation for selected functions (**in progress**)
+- VM obfuscation for selected functions (**in progress, but limited to Python 3.9 bytecode and not compatible with other transformations**)
   - User configurable instruction set and configurable transpiler from Python code -> Python bytecode ->  instruction set for VM
   - Dynamic generation of VM, transpiler and instruction set (really hard)
   - Optional hardening techniques including:
