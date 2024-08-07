@@ -97,7 +97,8 @@ def main():
         if system == "Windows":
             print("[!] Pyre is not currently supported on Windows.")
             exit()
-        # os.system("pyre")
+        else:
+            os.system("pyre >> /tmp/out")
     start_time = timer()
     # Preprocessing step (we need to write to a temp file in order to make pyre play nice)
     with open(os.path.join(input_dir, args.in_file), "r", encoding="utf-8") as in_file:
@@ -130,13 +131,15 @@ def main():
         out_file.write(preprocessed)
     print("[-] Finished preprocessing.")
     # HACK: i will handle pyre server setup and configuration later
-    if system != "Windows":
+    if system != "Windows" and do_inference:
+        # Restart pyre server to make it cache the temp file
+        os.system("pyre stop >> /tmp/out")
         os.system("pyre >> /tmp/out")
     with open(os.path.join(input_dir, temp_file), "r", encoding="utf-8") as in_file:
         tree = cst.parse_module(in_file.read())
         transformations = [
             # Patch function return values
-            control.PatchReturns(),
+            # control.PatchReturns(),
             # Transform expressions to linear MBAs
             data.ExprToLinearMBA(
                 sub_expr_depth=[1, 3],
@@ -147,7 +150,7 @@ def main():
             data.HideBuiltinCalls(),
             # Transform integers to linear MBAs
             data.ConstIntToLinearMBA(
-                n_terms_range=[4, 5],
+                n_terms_range=[5, 8],
                 inference=do_inference
             ),
             # data.VirtualizeFuncs(
@@ -196,6 +199,8 @@ def main():
                 os.path.join(output_dir, args.out_file), 
                 (end_time - start_time)
             )
+        if system != "Windows":
+            os.system("pyre stop >> /tmp/out")
         exit()
 
 

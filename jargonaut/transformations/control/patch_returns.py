@@ -25,6 +25,7 @@ class PatchReturns(cst.CSTTransformer):
     def __init__(self, avoid=None):
         if sys.version_info.minor > 10:
             print("[!] PatchReturns() cannot be used for Python >3.10 due to PEP 659.")
+            exit()
         self.avoid = avoid
         self.first_visit = True
         self.progress_msg = "Patching function return values..."
