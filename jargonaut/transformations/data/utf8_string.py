@@ -47,18 +47,10 @@ class StringToUTF8Int(cst.CSTTransformer):
                                 value=cst.Integer(
                                     value=encoded_string,
                                     lpar=[
-                                        cst.LeftParen(
-                                            whitespace_after=cst.SimpleWhitespace(
-                                                value='',
-                                            ),
-                                        ),
+                                        cst.LeftParen(),
                                     ],
                                     rpar=[
-                                        cst.RightParen(
-                                            whitespace_before=cst.SimpleWhitespace(
-                                                value='',
-                                            ),
-                                        ),
+                                        cst.RightParen(),
                                     ],
                                 ),
                                 attr=cst.Name(
@@ -66,14 +58,7 @@ class StringToUTF8Int(cst.CSTTransformer):
                                     lpar=[],
                                     rpar=[],
                                 ),
-                                dot=cst.Dot(
-                                    whitespace_before=cst.SimpleWhitespace(
-                                        value='',
-                                    ),
-                                    whitespace_after=cst.SimpleWhitespace(
-                                        value='',
-                                    ),
-                                ),
+                                dot=cst.Dot(),
                                 lpar=[],
                                 rpar=[],
                             ),
@@ -86,18 +71,10 @@ class StringToUTF8Int(cst.CSTTransformer):
                                                     value=cst.Integer(
                                                         value=encoded_string,
                                                         lpar=[
-                                                            cst.LeftParen(
-                                                                whitespace_after=cst.SimpleWhitespace(
-                                                                    value='',
-                                                                ),
-                                                            ),
+                                                            cst.LeftParen(),
                                                         ],
                                                         rpar=[
-                                                            cst.RightParen(
-                                                                whitespace_before=cst.SimpleWhitespace(
-                                                                    value='',
-                                                                ),
-                                                            ),
+                                                            cst.RightParen(),
                                                         ],
                                                     ),
                                                     attr=cst.Name(
@@ -105,34 +82,15 @@ class StringToUTF8Int(cst.CSTTransformer):
                                                         lpar=[],
                                                         rpar=[],
                                                     ),
-                                                    dot=cst.Dot(
-                                                        whitespace_before=cst.SimpleWhitespace(
-                                                            value='',
-                                                        ),
-                                                        whitespace_after=cst.SimpleWhitespace(
-                                                            value='',
-                                                        ),
-                                                    ),
+                                                    dot=cst.Dot(),
                                                     lpar=[],
                                                     rpar=[],
                                                 ),
                                                 args=[],
                                                 lpar=[],
                                                 rpar=[],
-                                                whitespace_after_func=cst.SimpleWhitespace(
-                                                    value='',
-                                                ),
-                                                whitespace_before_args=cst.SimpleWhitespace(
-                                                    value='',
-                                                ),
                                             ),
                                             operator=cst.Add(
-                                                whitespace_before=cst.SimpleWhitespace(
-                                                    value=' ',
-                                                ),
-                                                whitespace_after=cst.SimpleWhitespace(
-                                                    value=' ',
-                                                ),
                                             ),
                                             right=cst.Integer(
                                                 value='7',
@@ -140,28 +98,13 @@ class StringToUTF8Int(cst.CSTTransformer):
                                                 rpar=[],
                                             ),
                                             lpar=[
-                                                cst.LeftParen(
-                                                    whitespace_after=cst.SimpleWhitespace(
-                                                        value='',
-                                                    ),
-                                                ),
+                                                cst.LeftParen(),
                                             ],
                                             rpar=[
-                                                cst.RightParen(
-                                                    whitespace_before=cst.SimpleWhitespace(
-                                                        value='',
-                                                    ),
-                                                ),
+                                                cst.RightParen(),
                                             ],
                                         ),
-                                        operator=cst.FloorDivide(
-                                            whitespace_before=cst.SimpleWhitespace(
-                                                value=' ',
-                                            ),
-                                            whitespace_after=cst.SimpleWhitespace(
-                                                value=' ',
-                                            ),
-                                        ),
+                                        operator=cst.FloorDivide(),
                                         right=cst.Integer(
                                             value='8',
                                             lpar=[],
@@ -172,21 +115,8 @@ class StringToUTF8Int(cst.CSTTransformer):
                                     ),
                                     keyword=None,
                                     equal=cst.MaybeSentinel.DEFAULT,
-                                    comma=cst.Comma(
-                                        whitespace_before=cst.SimpleWhitespace(
-                                            value='',
-                                        ),
-                                        whitespace_after=cst.SimpleWhitespace(
-                                            value=' ',
-                                        ),
-                                    ),
-                                    star='',
-                                    whitespace_after_star=cst.SimpleWhitespace(
-                                        value='',
-                                    ),
-                                    whitespace_after_arg=cst.SimpleWhitespace(
-                                        value='',
-                                    ),
+                                    comma=cst.Comma(),
+                                    star=''
                                 ),
                                 cst.Arg(
                                     value=cst.SimpleString(
@@ -197,34 +127,18 @@ class StringToUTF8Int(cst.CSTTransformer):
                                     keyword=None,
                                     equal=cst.MaybeSentinel.DEFAULT,
                                     comma=cst.MaybeSentinel.DEFAULT,
-                                    star='',
-                                    whitespace_after_star=cst.SimpleWhitespace(
-                                        value='',
-                                    ),
-                                    whitespace_after_arg=cst.SimpleWhitespace(
-                                        value='',
-                                    ),
+                                    star=''
                                 ),
                             ],
                             lpar=[],
                             rpar=[],
-                            whitespace_after_func=cst.SimpleWhitespace(
-                                value='',
-                            ),
-                            whitespace_before_args=cst.SimpleWhitespace(
-                                value='',
-                            ),
                         ),
                         slice=[
                             cst.SubscriptElement(
                                 slice=cst.Slice(
                                     lower=None,
                                     upper=cst.UnaryOperation(
-                                        operator=cst.Minus(
-                                            whitespace_after=cst.SimpleWhitespace(
-                                                value='',
-                                            ),
-                                        ),
+                                        operator=cst.Minus(),
                                         expression=cst.Integer(
                                             value='1',
                                             lpar=[],
@@ -234,34 +148,17 @@ class StringToUTF8Int(cst.CSTTransformer):
                                         rpar=[],
                                     ),
                                     step=None,
-                                    first_colon=cst.Colon(
-                                        whitespace_before=cst.SimpleWhitespace(
-                                            value='',
-                                        ),
-                                        whitespace_after=cst.SimpleWhitespace(
-                                            value='',
-                                        ),
-                                    ),
+                                    first_colon=cst.Colon(),
                                     second_colon=cst.MaybeSentinel.DEFAULT,
                                 ),
                                 comma=cst.MaybeSentinel.DEFAULT,
                             ),
                         ],
-                        lbracket=cst.LeftSquareBracket(
-                            whitespace_after=cst.SimpleWhitespace(
-                                value='',
-                            ),
-                        ),
-                        rbracket=cst.RightSquareBracket(
-                            whitespace_before=cst.SimpleWhitespace(
-                                value='',
-                            ),
-                        ),
+                        lbracket=cst.LeftSquareBracket(),
+                        rbracket=cst.RightSquareBracket(),
                         lpar=[],
                         rpar=[],
-                        whitespace_after_value=cst.SimpleWhitespace(
-                            value='',
-                        ),
+
                     ),
                     attr=cst.Name(
                         value='decode',
@@ -300,12 +197,6 @@ class StringToUTF8Int(cst.CSTTransformer):
                 ],
                 lpar=[],
                 rpar=[],
-                whitespace_after_func=cst.SimpleWhitespace(
-                    value='',
-                ),
-                whitespace_before_args=cst.SimpleWhitespace(
-                    value='',
-                ),
             )
             return new_node
         else:
