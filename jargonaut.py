@@ -86,6 +86,8 @@ def print_stats(in_file, out_file, time):
 
 
 def main():
+    input_dir = "input"
+    output_dir = "output"
     args = handle_args()
     do_inference = args.inference
     system = platform.system()
@@ -98,7 +100,7 @@ def main():
         # os.system("pyre")
     start_time = timer()
     # Preprocessing step (we need to write to a temp file in order to make pyre play nice)
-    with open(args.in_file, "r", encoding="utf-8") as in_file:
+    with open(os.path.join(input_dir, args.in_file), "r", encoding="utf-8") as in_file:
         tree = cst.parse_module(in_file.read())
         transformations = [
             # Seed function definitions and calls with bogus ints for 
@@ -109,7 +111,7 @@ def main():
         for i, t in enumerate(transformations):
             if do_inference is True:
                 manager = FullRepoManager(
-                    os.path.dirname(args.in_file),
+                    input_dir,
                     {args.in_file},
                     {TypeInferenceProvider}
                 )
@@ -123,14 +125,14 @@ def main():
 
     temp_file = "jargonaut_tmp.py"
     preprocessed = tree.code 
-    with open(temp_file, "w", encoding="utf-8") as out_file:
+    with open(os.path.join(input_dir, temp_file), "w", encoding="utf-8") as out_file:
         out_file.write("# -*- coding: utf-8 -*\n")
         out_file.write(preprocessed)
     print("[-] Finished preprocessing.")
     # HACK: i will handle pyre server setup and configuration later
     if system != "Windows":
         os.system("pyre >> /tmp/out")
-    with open(temp_file, "r", encoding="utf-8") as in_file:
+    with open(os.path.join(input_dir, temp_file), "r", encoding="utf-8") as in_file:
         tree = cst.parse_module(in_file.read())
         transformations = [
             # Patch function return values
@@ -167,7 +169,7 @@ def main():
         for i, t in enumerate(transformations):
             if do_inference is True:
                 manager = FullRepoManager(
-                    os.path.dirname(temp_file),
+                    input_dir,
                     {temp_file},
                     {TypeInferenceProvider}
                 )
@@ -179,7 +181,7 @@ def main():
                 tree = wrapper.visit(t)
             t.spinner.ok()
         obfus = tree.code
-        with open(args.out_file, "w", encoding="utf-8") as out_file:
+        with open(os.path.join(output_dir, args.out_file), "w", encoding="utf-8") as out_file:
             # Most specify encoding in output file due to binary string obfuscation
             out_file.write("# -*- coding: utf-8 -*\n")
             # For PatchReturn(): this is temporary
@@ -189,7 +191,11 @@ def main():
         print("[-] Done all transformations.")
         end_time = timer()
         if args.print_stats:
-            print_stats(args.in_file, args.out_file, (end_time - start_time))
+            print_stats(
+                os.path.join(input_dir, args.in_file), 
+                os.path.join(output_dir, args.out_file), 
+                (end_time - start_time)
+            )
         exit()
 
 

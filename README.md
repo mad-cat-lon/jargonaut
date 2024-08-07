@@ -12,7 +12,7 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 
 ## Features
 - Basic variable, function, class and argument renaming 
-- Obfuscation of function return values with bytecode patching
+- Obfuscation of function return values with bytecode patching (Python versions <3.10 ONLY due to [PEP 659](https://peps.python.org/pep-0659/) changing how the interpreter works)
 - String obfuscation with lambda expressions 
 - Dummy argument/variable insertion 
 - Basic obfuscation of calls to builtin functions with `getattr`, e.g `print` becomes `getattr(__builtins__, breakpoint.__name__[5]+StopAsyncIteration.__name__[12]+issubclass.__name__[0]+credits.__class__.__name__[4]+AssertionError.__name__[5])`
@@ -66,7 +66,7 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 ## Setup 
 `jargonaut` uses pyre for type inference. As of right now, pyre is only used during MBA expression generation to avoid transforming string concatenation with variables. If you don't use pyre, **there is a significant chance that the obfuscated code will contain errors and some complex features will not be available.** Also note that pyre is not supported on Windows - for stability, you should be using OSX, Linux or WSL. Instructions for installing and setting up pyre can be found [here](https://pyre-check.org/docs/getting-started/).
 
-After installing pyre, place the file you would like to obfuscate in `jargonaut`'s repo directory and run `pyre init`. The pyre server will then be initialized and monitor the directory for changes during the obfuscation process. Support for files in outside directories and automatic installation, setup and configuaration of pyre will come later. You will need to ensure that the pyre server is started by running `pyre` before running `jargonaut.py`
+After installing pyre, place the file you would like to obfuscate in `jargonaut/input` and run `pyre`. Support for files in outside directories and automatic installation, setup and configuration of pyre will come later. You will need to ensure that the pyre server is started by running `pyre` before running `jargonaut.py`
 
 You can also do the following:
 ```
@@ -76,9 +76,11 @@ chmod +x setup.sh
 ./setup.sh
 
 pyre
-cp source_file.py .
+cp path/to/source_file.py input/
 python jargonaut.py -in_file source_file.py -out_file obfus_file.py --inference
 ```
+
+The output file will be in the `output` directory. 
 ## Usage
 ```
 usage: jargonaut [-h] [-in_file IN_FILE] [-out_file OUT_FILE] [--inference]
