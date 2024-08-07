@@ -2,3 +2,4 @@ from jargonaut.transformations.data.expr_mba import ExprToLinearMBA
 from jargonaut.transformations.data.int_mba import ConstIntToLinearMBA
 from jargonaut.transformations.data.lambda_string import StringToLambdaExpr
 from jargonaut.transformations.data.hide_builtin_calls import HideBuiltinCalls
+from jargonaut.transformations.data.utf8_string import StringToUTF8Int

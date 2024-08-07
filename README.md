@@ -13,7 +13,7 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
 ## Features
 - Basic variable, function, class and argument renaming 
 - Obfuscation of function return values with bytecode patching (Python versions <3.10 ONLY due to [PEP 659](https://peps.python.org/pep-0659/) changing how the interpreter works)
-- String obfuscation with lambda expressions 
+- String obfuscation with lambda expressions and UTF8 encoding
 - Dummy argument/variable insertion 
 - Basic obfuscation of calls to builtin functions with `getattr`, e.g `print` becomes `getattr(__builtins__, breakpoint.__name__[5]+StopAsyncIteration.__name__[12]+issubclass.__name__[0]+credits.__class__.__name__[4]+AssertionError.__name__[5])`
 - Obfuscation of arithmetic/bitwise expressions to [linear mixed boolean arithmetic expressions](https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5)
@@ -27,12 +27,14 @@ Note that this is a proof-of-concept and a work in progress. You should not be u
   ```
 - Super basic insertion of [static opaque predicates](https://arxiv.org/pdf/1909.01640.pdf) into function bodies, reusing MBA functionality from before 
 - Comment removal 
+- Type hint removal
+
 
 ## Planned improvements
 ### Upcoming features 
 - ~Comment removal~
 - Array transformation (and transformation of other data to arrays)
-- Type hint removal
+- ~Type hint removal~
 - Polynomial MBA expressions and more advanced obfuscation rules (**coming soon**)
 - Renaming class methods and attributes (**in progress**)
 - Opaque predicates/expressions (**in progress**)

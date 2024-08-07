@@ -148,6 +148,8 @@ def main():
             ),
             # Obfuscate builtin calls
             data.HideBuiltinCalls(),
+            # Convert strings to UTF-8 encoded ints
+            data.StringToUTF8Int(),
             # Transform integers to linear MBAs
             data.ConstIntToLinearMBA(
                 n_terms_range=[5, 8],
@@ -156,7 +158,7 @@ def main():
             # data.VirtualizeFuncs(
             #     targets=["square_list"],
             #     inference=do_inference
-            # ),
+            # )
             # Replace string literals with lambda functions
             data.StringToLambdaExpr(),
             # Remove comments
@@ -167,7 +169,7 @@ def main():
             layout.RandomizeNames(),
             # Randomize methods and attributes
             layout.RandomizeAttributes(),
-            # Remove annotations
+            # # Remove annotations
             layout.RemoveAnnotations()
     
         ]
