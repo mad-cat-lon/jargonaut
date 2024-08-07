@@ -3,7 +3,9 @@ from libcst.metadata import (
     QualifiedNameSource,
     ScopeProvider,
     ClassScope,
-    TypeInferenceProvider
+    FunctionScope,
+    TypeInferenceProvider,
+    ParentNodeProvider
 )
 import libcst as cst
 import random 
@@ -11,7 +13,6 @@ from typing import Optional
 from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
 import builtins
-from collections import defaultdict
 
 
 class RandomizeAttributes(cst.CSTTransformer):
@@ -23,11 +24,12 @@ class RandomizeAttributes(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (
         QualifiedNameProvider,
         ScopeProvider,
-        TypeInferenceProvider
+        TypeInferenceProvider,
+        ParentNodeProvider
     )
 
     def __init__(self):
-        self.randomize_map = defaultdict(self.rand_name)
+        self.randomize_map = {}
         self.avoid_names = ["self", "__init__", "main", "super"]
         self.avoid_names.extend(dir(builtins))
         self.ignore = False
@@ -97,15 +99,23 @@ class RandomizeAttributes(cst.CSTTransformer):
             return updated_node
         qualified_names = list(scope.get_qualified_names_for(original_node))
         qualified_name = qualified_names[0]
-        # print(f"scope: {scope} qualified_name: {qualified_name}")
-        if isinstance(scope, ClassScope):
+        if isinstance(scope, FunctionScope):
             if qualified_name.source == QualifiedNameSource.LOCAL:
                 if original_node.attr.value not in self.avoid_names:
-                    return updated_node.with_changes(
-                        attr=cst.Name(
-                            value=self.randomize_map[original_node.attr.value]
+                    if original_node.attr.value not in self.randomize_map:
+                        new_name = self.rand_name()
+                        self.randomize_map[original_node.attr.value] = new_name
+                        return updated_node.with_changes(
+                            attr=cst.Name(
+                                value=new_name
+                            )
                         )
-                    )
+                    else:
+                        return updated_node.with_changes(
+                            attr=cst.Name(
+                                value=self.randomize_map[original_node.attr.value]
+                            )
+                        ) 
                 else:
                     return updated_node
             else:
