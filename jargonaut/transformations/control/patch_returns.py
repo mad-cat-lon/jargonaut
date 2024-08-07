@@ -4,7 +4,7 @@ import libcst as cst
 import random
 from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
-
+import sys
 
 class PatchReturns(cst.CSTTransformer):
     """
@@ -22,6 +22,8 @@ class PatchReturns(cst.CSTTransformer):
     METADATA_DEPENDENCIES = (ScopeProvider,)
 
     def __init__(self, avoid=None):
+        if sys.version_info.minor > 10:
+            print("[!] PatchReturns() cannot be used for Python >3.10 due to PEP 659.")
         self.avoid = avoid
         self.first_visit = True
         self.progress_msg = "Patching function return values..."
