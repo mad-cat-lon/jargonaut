@@ -54,7 +54,7 @@ class RandomizeAttributes(cst.CSTTransformer):
             # Avoid messing with the lambda strings which use
             # __code__ as well 
             dummyFunc.__code__
-            ]
+        ]
         for t in types_to_inspect:
             self.avoid_names.extend(method for method in dir(t))
 
@@ -91,7 +91,10 @@ class RandomizeAttributes(cst.CSTTransformer):
         original_node: cst.Attribute,
         updated_node: cst.Attribute
     ) -> Optional[bool]:
-        scope = self.get_metadata(ScopeProvider, original_node)
+        try:
+            scope = self.get_metadata(ScopeProvider, original_node)
+        except KeyError:
+            return updated_node
         qualified_names = list(scope.get_qualified_names_for(original_node))
         qualified_name = qualified_names[0]
         # print(f"scope: {scope} qualified_name: {qualified_name}")
