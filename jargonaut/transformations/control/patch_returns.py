@@ -6,6 +6,7 @@ from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
 import sys
 
+
 class PatchReturns(cst.CSTTransformer):
     """
     Does runtime bytecode patching to obscure the real return value of functions
