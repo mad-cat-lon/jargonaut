@@ -165,6 +165,8 @@ def main():
             control.InsertStaticOpaqueMBAPredicates(inference=do_inference),
             # Randomize names
             layout.RandomizeNames(),
+            # Randomize methods and attributes
+            layout.RandomizeAttributes(),
             # Remove annotations
             layout.RemoveAnnotations()
     
@@ -182,7 +184,10 @@ def main():
             else:
                 wrapper = cst.MetadataWrapper(tree)
                 tree = wrapper.visit(t)
-            t.spinner.ok()
+            try:
+                t.spinner.ok()
+            except Exception:
+                pass
         obfus = tree.code
         with open(os.path.join(output_dir, args.out_file), "w", encoding="utf-8") as out_file:
             # Most specify encoding in output file due to binary string obfuscation
