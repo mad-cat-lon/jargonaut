@@ -91,4 +91,4 @@ class RandomizeNames(cst.CSTTransformer):
                     return updated_node.with_changes(
                         value=self.randomize_map[qualified_name.name]
                     )
-        return updated_node 
+        return updated_node
