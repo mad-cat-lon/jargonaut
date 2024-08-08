@@ -122,8 +122,10 @@ def main():
             else:
                 wrapper = cst.MetadataWrapper(tree)
                 tree = wrapper.visit(t)
-            t.spinner.ok()
-
+            try:
+                t.spinner.ok()
+            except Exception:
+                pass
     temp_file = "jargonaut_tmp.py"
     preprocessed = tree.code 
     with open(os.path.join(input_dir, temp_file), "w", encoding="utf-8") as out_file:
