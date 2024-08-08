@@ -3,7 +3,7 @@ import random
 from libcst.metadata import ParentNodeProvider, TypeInferenceProvider, PositionProvider
 from libcst.metadata import ScopeProvider
 from libcst.metadata import GlobalScope
-from .mba_utils import constant_to_mba
+from .mba_utils import constant_to_linear_mba
 from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
 from typing import Tuple, List
@@ -26,18 +26,18 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         self.first_visit = True
         self.progress_msg = "Transforming all integer constants to linear MBA forms..."
         self.spinner = None
-        if inference is False:
-            ConstIntToLinearMBA.METADATA_DEPENDENCIES = (
-                ParentNodeProvider,
-                PositionProvider,
-                ScopeProvider,
-            )
-        else:
+        if inference:
             ConstIntToLinearMBA.METADATA_DEPENDENCIES = (
                 ParentNodeProvider,
                 TypeInferenceProvider,
                 PositionProvider,
                 ScopeProvider
+            )
+        else:
+            ConstIntToLinearMBA.METADATA_DEPENDENCIES = (
+                ParentNodeProvider,
+                PositionProvider,
+                ScopeProvider,
             )
         self.func_ints = []
         self.global_ints = []
@@ -117,7 +117,7 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
         original_node: cst.Integer,
         updated_node: cst.Integer
     ):
-        constant_mba = constant_to_mba(
+        constant_mba = constant_to_linear_mba(
             int(original_node.evaluated_value),
             n_terms=random.choice(self.n_terms_range),
             as_obj=False
@@ -138,7 +138,8 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
                     try:
                         inferred_type = self.get_metadata(TypeInferenceProvider, assign_node)
                         assign_pos = self.get_metadata(PositionProvider, assign_node)
-                        if node_pos.start.line > assign_pos.start.line and inferred_type == "int":
+                        # Add a margin of safety to prevent default params using other seed parameters
+                        if node_pos.start.line > assign_pos.start.line+5 and inferred_type == "int":
                             available.append(assign_node.value)
                     except KeyError:
                         pass

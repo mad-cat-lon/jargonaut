@@ -76,7 +76,7 @@ class RandomizeAttributes(cst.CSTTransformer):
             "ⅉ",
             "ｊ"
         ]
-        return ''.join(random.choices(keys, k=30))
+        return ''.join(random.choices(keys, k=8))
     
     def visit_Node(self, node):
         if self.first_visit is True:
@@ -98,6 +98,8 @@ class RandomizeAttributes(cst.CSTTransformer):
         except KeyError:
             return updated_node
         qualified_names = list(scope.get_qualified_names_for(original_node))
+        if not qualified_names:
+            return updated_node
         qualified_name = qualified_names[0]
         if isinstance(scope, FunctionScope):
             if qualified_name.source == QualifiedNameSource.LOCAL:

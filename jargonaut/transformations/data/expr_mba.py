@@ -121,5 +121,16 @@ class ExprToLinearMBA(cst.CSTTransformer):
             )
             return mba_expr
 
-    
 
+class ExprToPolyMBA(cst.CSTTransformer):
+    """
+    Converts binary operations into polynomial mixed boolean arithmetic expressions
+    
+    Attributes:
+        sub_expr_depth: int range specifying recursion depth for sub-expressions, eg.
+                        ((x + y) & 13) has a sub-expression (x+y)
+
+        super_expr_depth: int range specifying recursion depth for parent expressions, eg.
+                          ((x + y) & 13) has super-expression ((sub_expr) & 13)
+    """
+    

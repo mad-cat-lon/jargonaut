@@ -92,7 +92,7 @@ def rewrite_expr(node: cst.BinaryOperation, depth=2):
     return mba_expr
 
 
-def generate_zero_identity_mba(t):
+def generate_zero_id_linear_mba(t):
     """
     Generates a linear MBA expression of t variables that always evaluates to 0 
     for any x, y in Z
@@ -143,7 +143,7 @@ def generate_invertible_affine(n):
     return (a, b), (a_inv, b_inv)
 
 
-def constant_to_mba(k, n_terms, as_obj=True):
+def constant_to_linear_mba(k, n_terms, as_obj=True):
     """
     Generates an affine function and zero-identity MBA and produces an 
     equivalent MBA expression node that always evaluates to the target constant k
@@ -157,7 +157,7 @@ def constant_to_mba(k, n_terms, as_obj=True):
         constant_mba_expr: generated expression that evaluates to k for any x,y
     """
     # NOTE: Calling this function is really expensive :( maybe this can be optimmized? 
-    zero_id_mba = generate_zero_identity_mba(n_terms)
+    zero_id_mba = generate_zero_id_linear_mba(n_terms)
     # https://sci-hub.se/https://link.springer.com/chapter/10.1007/978-3-540-77535-5_5
     # Page 4, Proposition 2
     # Proposition is for invertible polynomials but should work on affine functions too
@@ -186,4 +186,14 @@ def constant_to_mba(k, n_terms, as_obj=True):
         return constant_mba_expr
 
 
+def generate_zero_eq_poly_mba():
+    """
+    Generates a random polynomial MBA that always evaluates to zero
+    """
+    # Let E_1 be an expression
+    # Let E_2 and E_m_2 be linear MBA expressions 
+    # The coefficients of E_1 are randomly reversed to construct a new expression E_m_1 
+    # A sub-expression of E_2 forms part of E_m_2 and E_m_2 = 0
+    # Then E_1 * E_2's 0-equality is Z = E_m_1 * E_m_2 = 0 
+    
 
