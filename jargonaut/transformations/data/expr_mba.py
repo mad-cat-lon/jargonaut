@@ -80,15 +80,13 @@ class ExprToLinearMBA(cst.CSTTransformer):
                     TypeInferenceProvider,
                     original_node.left
                 )
-            except KeyError:
-                pass
-            try:
                 right_inferred_type = self.get_metadata(
                     TypeInferenceProvider,
                     original_node.right
                 )
             except KeyError:
-                pass
+                # If we can't infer the type, just do nothing to the node to be safe
+                return updated_node
             # Account for the case where we have the following:
             # a = "abcd"
             # b = "efgh"

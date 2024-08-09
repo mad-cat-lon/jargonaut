@@ -126,13 +126,29 @@ class SeedParams(cst.CSTTransformer):
         if qualified_names:
             qualified_name = next(iter(qualified_names)).name
             if qualified_name in self.funcs:
-                new_args = original_node.args + tuple(
+                updated_args = list(original_node.args)
+                new_args = [
                     cst.Arg(
                         value=cst.Integer(
-                            value=str(random.randint(0, 100))
+                            value=str(random.randint(0, 1000))
                         )
                     ) for _ in range(self.num_params)
+                ]
+                # Find the location of the first default and insert before it
+                insert_idx = -1
+                for i, a in enumerate(original_node.args):
+                    if isinstance(a.equal, cst.AssignEqual):
+                        insert_idx = i
+                        break
+                if insert_idx != -1:
+                    updated_args = (
+                        updated_args[:insert_idx] +
+                        new_args +
+                        updated_args[insert_idx:]
+                    )
+                else:
+                    updated_args = updated_args + new_args
+                return updated_node.with_changes(
+                    args=tuple(updated_args)
                 )
-                return updated_node.with_changes(args=new_args)
-
         return updated_node

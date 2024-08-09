@@ -2,7 +2,11 @@ import libcst as cst
 import random 
 from libcst.metadata import ParentNodeProvider, TypeInferenceProvider, PositionProvider
 from libcst.metadata import ScopeProvider
-from libcst.metadata import GlobalScope
+from libcst.metadata import (
+    GlobalScope,
+    ClassScope,
+    FunctionScope
+)
 from .mba_utils import constant_to_linear_mba
 from yaspin.spinners import Spinners
 from yaspin import kbi_safe_yaspin
@@ -125,10 +129,15 @@ class ConstIntToLinearMBA(cst.CSTTransformer):
 
         if self.inference:
             scope = self.get_metadata(ScopeProvider, original_node)
-            # print("="*50)
-            available = self.func_ints
-            # print(available)
             try:
+                available = []
+                # If we're replacing an int in a default value for a parameter, we can't use 
+                # other int parameters 
+                # i.e def func(x, seed_int_param_1: int, y=4)
+                # -> func(x, seed_int_param_1: int, y=((seed_int_param_1 ^ 4)%2*12345) would be invalid
+                if isinstance(scope, FunctionScope):
+                    available = self.func_ints
+                
                 node_pos = self.get_metadata(PositionProvider, original_node)
                 available = available + [
                     i.value for i in self.get_global_ints_for_node_pos(node_pos.start.line)
